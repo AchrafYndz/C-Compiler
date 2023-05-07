@@ -2,7 +2,9 @@ grammar C;
 
 /* Lexer Rules */
 
-INCLUDE: '#include <stdio.h>' SEMI?;
+INCLUDE: '#include';
+
+FILE_EXT: '.h';
 
 INT: [0-9][0-9]*;
 
@@ -13,6 +15,20 @@ CONST: 'const';
 TYPE: 'char'| 'float' | 'int';
 
 VOID: 'void';
+
+IF: 'if';
+ELSE: 'else';
+SWITCH: 'switch';
+CASE: 'case';
+
+FOR: 'for';
+WHILE: 'while';
+CONTINUE: 'continue';
+BREAK: 'break';
+RETURN: 'return';
+
+PRINTF: 'printf';
+SCANF: 'scanf';
 
 IDENTIFIER: START_IDENTIFIER BODY_IDENTIFIER;
 fragment
@@ -59,7 +75,7 @@ DOUBLE_QUOTE: '"';
 
 STRING: DOUBLE_QUOTE .*? DOUBLE_QUOTE;
 
-COMMENT: LINE_COMMENT | BLOCK_COMMENT;
+COMMENT: (LINE_COMMENT | BLOCK_COMMENT) -> channel(2);
 fragment
 LINE_COMMENT: '//' ~[\r\n]*;
 fragment
@@ -71,27 +87,35 @@ CHARSEQUENCE: ~['\\\r\n] | ESCAPESEQUENCE;
 fragment
 ESCAPESEQUENCE: '\\' ['"?abfnrtv\\];
 
+WS: [ \n\t\r]+ -> skip;
+
 
 /* Parser Rules */
 
-program: include? (function_declaration (SEMI | scope) /* | declaration SEMICOLON*/)* EOF;
+program: include? (function_declaration (SEMI | scope)  | declaration SEMI | statement)* EOF;
 
 include: INCLUDE;
 
-function_declaration: function_return_type IDENTIFIER LPARA (function_argument (COMMA function_argument)*)? RPARA;
+function_declaration: (type_declaration | VOID) IDENTIFIER LPARA (function_argument (COMMA function_argument)*)? RPARA;
 
-function_argument: argument_type IDENTIFIER;
+type_declaration: CONST? TYPE? (MUL_PTR CONST?)*;
 
-argument_type: CONST? TYPE (MUL_PTR CONST?)*;
+function_argument: type_declaration IDENTIFIER;
 
-function_return_type: (CONST? TYPE (MUL_PTR CONST?)*) | VOID;
+scope: LBRACE (declaration | statement | function_declaration)* RBRACE;
 
-scope: LBRACE (statement /* | declaration SEMI */)* RBRACE;
+declaration: type_declaration variable_definition (COMMA variable_definition)*;
 
-statement: scope | expression SEMI /* if statement, while and return/break/continue */;
+variable_definition: IDENTIFIER (LBRACK literal RBRACK)? (ASS expression)?;
+
+statement: scope
+           | expression SEMI
+           | conditional
+           | loop
+           | branch /* return/break/continue */;
 
 /* https://www.tutorialspoint.com/cprogramming/c_operators_precedence.htm */
-expression: function_call
+expression: (function_call|print|scan)
             | expression operation=LBRACK expression RBRACK // Postfix
             | expression operation=(INCR | DECR) // Postfix
             | LPARA TYPE RPARA expression // Unary
@@ -106,6 +130,20 @@ expression: function_call
             | IDENTIFIER
             | literal;
 
-function_call: 'pass';
+function_call: IDENTIFIER LPARA (expression (COMMA expression)*)? RPARA;
+
+print: PRINTF LPARA STRING (COMMA (expression|STRING))* RPARA;
+
+scan: SCANF LPARA STRING (COMMA (expression|STRING))* RPARA;
 
 literal: INT | FLOAT | CHAR;
+
+conditional: IF LPARA expression RPARA statement (ELSE statement)?
+             | SWITCH LPARA expression RPARA statement
+             | CASE literal COLON statement;
+
+loop: WHILE LPARA expression RPARA statement
+      | FOR LPARA declaration? SEMI expression? SEMI expression? RPARA statement;
+
+branch: RETURN expression? SEMI
+        | (CONTINUE|BREAK)? SEMI;
