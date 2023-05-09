@@ -8,6 +8,8 @@ from src.ASTCreator import ASTCreator
 from src.AST import AST
 from src.ASTErrorListener import ASTErrorListener
 
+from src.visitors.ASTVisitor import ASTVisitor
+
 
 def main(argv):
     input_stream = FileStream(argv[1])
@@ -28,6 +30,10 @@ def main(argv):
     root = ast_creator.root
 
     root.visualize(filename="test")
+
+    ast_visitor = ASTVisitor()
+
+    ast_visitor.visitChildren(root)
 
     ast = AST(root)
 
