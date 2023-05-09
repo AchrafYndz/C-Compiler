@@ -64,7 +64,7 @@ class Scope:
     def check_is_const(self, identifier: str):
         return self.get_variable(identifier).is_const
 
-    def alter_identifier(self, name, type_=None, is_const=None, is_assigned=None, ptr_level=None, array_size=None):
+    def alter_identifier(self, name, type_=None, is_const=None, is_assigned=None, ptr_level=None, array_size=None, args_count=None):
         previous_variable = self.get_variable(name)
 
         new_type = type_ if type_ else previous_variable.type_
@@ -77,6 +77,7 @@ class Scope:
             self.table[name] = \
                 Array(name, new_type, new_is_const, new_is_assigned, new_ptr_level, new_array_size)
         elif previous_variable.isFunction():
+            new_args_count = args_count if args_count else previous_variable.args_count
             self.table[name] = \
                 Function(name, new_type, new_is_const, new_is_assigned, new_ptr_level)
         else:
@@ -125,5 +126,5 @@ class SymbolTable:
         assert (self.current_scope is not None)
         return self.current_scope.check_is_assigned(identifier)
 
-    def alter_identifier(self, name, type_=None, is_const=None, is_assigned=None, ptr_level=None, array_size=None):
-        self.current_scope.alter_identifier(name, type_, is_const, is_assigned, ptr_level, array_size)
+    def alter_identifier(self, name, type_=None, is_const=None, is_assigned=None, ptr_level=None, array_size=None, args_count=None):
+        self.current_scope.alter_identifier(name, type_, is_const, is_assigned, ptr_level, array_size, args_count)
