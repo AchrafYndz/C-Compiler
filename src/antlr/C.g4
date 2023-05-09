@@ -92,17 +92,17 @@ WS: [ \n\t\r]+ -> skip;
 
 /* Parser Rules */
 
-program: include? (function_declaration (SEMI | scope)  | declaration SEMI | statement)* EOF;
+program: include* (function_declaration | declaration SEMI | statement)* EOF;
 
-include: INCLUDE;
+include: INCLUDE LT IDENTIFIER FILE_EXT GT SEMI?;
 
-function_declaration: (type_declaration | VOID) IDENTIFIER LPARA (function_argument (COMMA function_argument)*)? RPARA;
+function_declaration: (type_declaration | VOID) IDENTIFIER LPARA (function_argument (COMMA function_argument)*)? RPARA (SEMI|scope);
 
 type_declaration: CONST? TYPE? (MUL_PTR CONST?)*;
 
 function_argument: type_declaration IDENTIFIER;
 
-scope: LBRACE (declaration | statement | function_declaration)* RBRACE;
+scope: LBRACE (declaration SEMI| statement | function_declaration)* RBRACE;
 
 declaration: type_declaration variable_definition (COMMA variable_definition)*;
 
@@ -112,13 +112,13 @@ statement: scope
            | expression SEMI
            | conditional
            | loop
-           | branch /* return/break/continue */;
+           | branch;
 
 /* https://www.tutorialspoint.com/cprogramming/c_operators_precedence.htm */
 expression: (function_call|print|scan)
             | expression operation=LBRACK expression RBRACK // Postfix
             | expression operation=(INCR | DECR) // Postfix
-            | LPARA TYPE RPARA expression // Unary
+            | LPARA operation=TYPE RPARA expression // Unary
             | operation=(PLUS | MIN | NOT | INCR | DECR | REF | MUL_PTR) expression // Unary
             | expression operation=(MUL_PTR | DIV | MOD) expression // Multiplicative
             | expression operation=(PLUS | MIN) expression // Additive
@@ -132,11 +132,11 @@ expression: (function_call|print|scan)
 
 function_call: IDENTIFIER LPARA (expression (COMMA expression)*)? RPARA;
 
-print: PRINTF LPARA STRING (COMMA (expression|STRING))* RPARA;
+print: PRINTF LPARA STRING (COMMA expression)* RPARA;
 
-scan: SCANF LPARA STRING (COMMA (expression|STRING))* RPARA;
+scan: SCANF LPARA STRING (COMMA expression)* RPARA;
 
-literal: INT | FLOAT | CHAR;
+literal: CHAR | STRING | INT | FLOAT;
 
 conditional: IF LPARA expression RPARA statement (ELSE statement)?
              | SWITCH LPARA expression RPARA statement
@@ -146,4 +146,4 @@ loop: WHILE LPARA expression RPARA statement
       | FOR LPARA declaration? SEMI expression? SEMI expression? RPARA statement;
 
 branch: RETURN expression? SEMI
-        | (CONTINUE|BREAK)? SEMI;
+        | (CONTINUE|BREAK) SEMI;
