@@ -1,5 +1,7 @@
 from enum import Enum
 
+from src.ast_nodes.BranchNode import BranchNode
+
 
 class TypeEnum(Enum):
     VOID = -1
@@ -31,6 +33,7 @@ class Type:
 
         return result
 
+
 def auto_cast(value):
     try:
         return int(value)
@@ -39,3 +42,12 @@ def auto_cast(value):
             return float(value)
         except ValueError:
             return ord(value.replace("'", ""))
+
+
+def returns_something(node, found):
+    for child in node.children:
+        if isinstance(child, BranchNode):
+            if child.sort == "return" and len(child.children) != 0:
+                found = True
+        found = returns_something(child, found)
+    return found

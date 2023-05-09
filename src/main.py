@@ -8,7 +8,7 @@ from src.ASTCreator import ASTCreator
 from src.AST import AST
 from src.ASTErrorListener import ASTErrorListener
 
-from src.visitors.ASTVisitor import ASTVisitor
+from src.visitors.SemanticAnalysisVisitor import SemanticAnalysisVisitor
 
 
 def main(argv):
@@ -31,9 +31,10 @@ def main(argv):
 
     root.visualize(filename="test")
 
-    ast_visitor = ASTVisitor()
+    ast_semantic_visitor = SemanticAnalysisVisitor()
 
-    ast_visitor.visitChildren(root)
+    # run semantic analysis
+    ast_semantic_visitor.visitChildren(root)
 
     ast = AST(root)
 

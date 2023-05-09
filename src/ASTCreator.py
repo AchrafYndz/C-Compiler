@@ -116,8 +116,9 @@ class ASTCreator(CListener):
         self.current_node = node
 
     def exitFunction_declaration(self, ctx: CParser.Function_declarationContext):
-        self.current_node.children[0], self.current_node.children[1] = \
-            self.current_node.children[1], self.current_node.children[0]  # swap function name and return type
+        if not isinstance(self.current_node.children[0], TypeDeclarationNode):
+            self.current_node.children[0], self.current_node.children[1] = \
+                self.current_node.children[1], self.current_node.children[0]
 
         self.current_node = self.current_node.parent
 

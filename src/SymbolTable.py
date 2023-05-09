@@ -31,7 +31,7 @@ class Function(Variable):
 
 
 class Scope:
-    def __init__(self, name, parent_scope=None):
+    def __init__(self, name="", parent_scope=None):
         self.name = name
         self.parent_scope = parent_scope
         self.table = {}

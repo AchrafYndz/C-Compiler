@@ -27,59 +27,58 @@ class ASTVisitor:
     def visitChildren(self, node):
         for child in node.children:
             visit_method = self.nodes_dict[type(child)]
-            print(f"Calling {visit_method}.")
             visit_method(child)
 
-    def visitArray_assignment(self, node):
+    def visitArray_assignment(self, node: ArrayAssignmentNode):
         self.visitChildren(node)
 
-    def visitAssignment(self, node):
+    def visitAssignment(self, node: AssignmentNode):
         self.visitChildren(node)
 
-    def visitBinary_expression(self, node):
+    def visitBinary_expression(self, node: BinaryExpressionNode):
         self.visitChildren(node)
 
-    def visitBranch(self, node):
+    def visitBranch(self, node: BranchNode):
         self.visitChildren(node)
 
-    def visitConditional(self, node):
+    def visitConditional(self, node: ConditionalNode):
         self.visitChildren(node)
 
-    def visitDeclaration(self, node):
+    def visitDeclaration(self, node: DeclarationNode):
         self.visitChildren(node)
 
-    def visitExplicit_conversion(self, node):
+    def visitExplicit_conversion(self, node: ExplicitConversionNode):
         self.visitChildren(node)
 
-    def visitFunction_argument(self, node):
+    def visitFunction_argument(self, node: FunctionArgumentNode):
         self.visitChildren(node)
 
-    def visitFunction_call(self, node):
+    def visitFunction_call(self, node: FunctionCallNode):
         self.visitChildren(node)
 
-    def visitFunction(self, node):
+    def visitFunction(self, node: FunctionNode):
         self.visitChildren(node)
 
-    def visitInclude(self, node):
+    def visitInclude(self, node: IncludeNode):
         self.visitChildren(node)
 
-    def visitLiteral(self, node):
+    def visitLiteral(self, node: LiteralNode):
         self.visitChildren(node)
 
-    def visitLoop(self, node):
+    def visitLoop(self, node: LoopNode):
         self.visitChildren(node)
 
-    def visitScope(self, node):
+    def visitScope(self, node: ScopeNode):
         self.visitChildren(node)
 
-    def visitType_declaration(self, node):
+    def visitType_declaration(self, node: TypeDeclarationNode):
         self.visitChildren(node)
 
-    def visitUnary_expression(self, node):
+    def visitUnary_expression(self, node: UnaryExpressionNode):
         self.visitChildren(node)
 
-    def visitVariable_definition(self, node):
+    def visitVariable_definition(self, node: VariableDefinitionNode):
         self.visitChildren(node)
 
-    def visitVariable(self, node):
+    def visitVariable(self, node: VariableNode):
         self.visitChildren(node)
