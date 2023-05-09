@@ -48,12 +48,18 @@ class SemanticAnalysisVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitFunction_call(self, node: FunctionCallNode):
+        function_obj = self.symbol_table.get_variable(node.name)
+        if len(node.children) != function_obj.args_count:
+            raise ValueError(f"Function {function_obj.name} expected {function_obj.args_count} arguments,"
+                             f" got {len(node.children)} instead.")
         self.visitChildren(node)
 
     def visitFunction(self, node: FunctionNode):
         type_node = node.children[0]
         variable_node = node.children[1]
         is_defined = isinstance(node.children[-1], ScopeNode)
+
+        args_count = len([child for child in node.children if isinstance(child, FunctionArgumentNode)])
 
         returns = False
         if returns_something(node, returns) and type_node.type.type == TypeEnum.VOID:
@@ -64,7 +70,8 @@ class SemanticAnalysisVisitor(ASTVisitor):
             type_=type_node.type.type,
             is_const=type_node.type.is_const,
             is_defined=is_defined,
-            ptr_level=0  # TODO: Determine this
+            ptr_level=0,  # TODO: Determine this
+            args_count=args_count
         )
         self.symbol_table.add_variable(function_obj)
         self.visitChildren(node)
@@ -89,6 +96,11 @@ class SemanticAnalysisVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitUnary_expression(self, node: UnaryExpressionNode):
+        operand_node = node.children[0]
+        if node.operator == "&":
+            if not isinstance(operand_node, VariableNode) and \
+                    not (isinstance(operand_node, UnaryExpressionNode) and operand_node.operator == "*"):
+                raise ValueError("Dereference expected lvalue")
         self.visitChildren(node)
 
     def visitVariable_definition(self, node: VariableDefinitionNode):
