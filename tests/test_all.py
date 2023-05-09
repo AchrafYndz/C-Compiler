@@ -2,42 +2,51 @@ import pytest
 import os
 from antlr4 import *
 
+from src.ASTCreator import ASTCreator
 from src.ASTErrorListener import ASTErrorListener
 from src.antlr.CLexer import CLexer
 from src.antlr.CParser import CParser
 
 
-def test_llvm():
+def test_grammar():
     for directory in ['tests/input/llvm', 'tests/input/semantic_errors']:
         counter = 0
-        fail_counter = 0
         for filename in os.listdir(directory):
             if filename.endswith('.c'):
                 filepath = os.path.join(directory, filename)
                 print(f"Now handling {filepath}, which is test {counter}")
-                try:
-                    counter += 1
-                    # ast_creator = SemanticAnalysisVisitor()
-                    input_stream = FileStream(filepath)
+                counter += 1
+                input_stream = FileStream(filepath)
 
-                    lexer = CLexer(input_stream)
-                    stream = CommonTokenStream(lexer)
-                    parser = CParser(stream)
-                    parser.removeErrorListeners()
-                    parser.addErrorListener(ASTErrorListener())
-                    tree = parser.program()
-
-                    # root = ast_creator.visitProgram(tree)
-                    # ast = AST(root)
-                    #
-                    # file = open("tests/output/llvm/"+filename+".ll", "w+")
-                    # assigned = []
-                    # ast.toLLVM(file, ast_creator.symbol_table, assigned)
-                    # file.close()
-                except Exception as e:
-                    fail_counter += 1
-                    print(f"{filepath} failed: {e}")
-                    continue
-        print(f"{fail_counter} tests failed")
+                lexer = CLexer(input_stream)
+                stream = CommonTokenStream(lexer)
+                parser = CParser(stream)
+                parser.removeErrorListeners()
+                parser.addErrorListener(ASTErrorListener())
+                tree = parser.program()
 
 
+def test_ast_creation():
+    for directory in ['tests/input/llvm', 'tests/input/semantic_errors']:
+        counter = 0
+        for filename in os.listdir(directory):
+            if filename.endswith('.c'):
+                filepath = os.path.join(directory, filename)
+                print(f"Now handling {filepath}, which is test {counter}")
+                counter += 1
+                input_stream = FileStream(filepath)
+                lexer = CLexer(input_stream)
+                stream = CommonTokenStream(lexer)
+                parser = CParser(stream)
+                tree = parser.program()
+
+                parser.removeErrorListeners()
+                parser.addErrorListener(ASTErrorListener())
+
+                walker = ParseTreeWalker()
+                ast_creator = ASTCreator()
+                walker.walk(ast_creator, tree)
+
+                # create AST tree
+                ast_creator.enterProgram(tree)
+                root = ast_creator.root

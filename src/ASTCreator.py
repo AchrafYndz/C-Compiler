@@ -64,7 +64,7 @@ class ASTCreator(CListener):
     def enterLiteral(self, ctx: CParser.LiteralContext):
         if ctx.CHAR():
             raw_value = ctx.CHAR().getText()
-            escaped_char = len(raw_value == 4)
+            escaped_char = len(raw_value) == 4
             if escaped_char:
                 value = ord(raw_value[1:3])
             else:
@@ -162,7 +162,8 @@ class ASTCreator(CListener):
 
             if is_array:
                 array_index_node = ctx.literal().children[0]
-                array_index = int(array_index_node.getText())
+
+                array_index = auto_cast(array_index_node.getText())
 
                 node = ArrayAssignmentNode(
                     name=name,
