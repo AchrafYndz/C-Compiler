@@ -9,10 +9,10 @@ int main(){
     a[0] = 15;
 	a[1] = 12;
 	x = 12;
-//	printf("%d; ", --a[1]); /*! not supported !*/
+	printf("%d; ", --a[1]);
     printf("%d; ", x++);
     printf("%d; ", x);
-//	a[0]--; /*! not supported !*/
+	a[0]--;
     printf("%d; ", a[0]);
     return 1;
 }
