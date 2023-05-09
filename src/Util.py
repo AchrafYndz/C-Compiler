@@ -30,3 +30,12 @@ class Type:
             result += TypeEnum(self.type).name
 
         return result
+
+def auto_cast(value):
+    try:
+        return int(value)
+    except ValueError:
+        try:
+            return float(value)
+        except ValueError:
+            return ord(value.replace("'", ""))

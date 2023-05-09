@@ -1,7 +1,7 @@
 from src.antlr.CParser import CParser
 from src.antlr.CListener import CListener
 from src.ast_nodes import *
-from src.Util import TypeEnum, Type
+from src.Util import TypeEnum, Type, auto_cast
 
 
 class ASTCreator(CListener):
@@ -268,7 +268,5 @@ class ASTCreator(CListener):
 
     def enterInclude(self, ctx: CParser.IncludeContext):
         to_include = ctx.IDENTIFIER().getText() + ctx.FILE_EXT().getText()
-        if to_include != 'stdio.h':
-            raise ValueError(f"Invalid include of {to_include}.")
         node = IncludeNode(to_include)
         self.current_node.addChild(node)
