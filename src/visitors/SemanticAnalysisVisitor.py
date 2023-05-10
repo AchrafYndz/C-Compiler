@@ -12,6 +12,11 @@ class SemanticAnalysisVisitor(ASTVisitor):
     def visitArray_assignment(self, node: ArrayAssignmentNode):
         if not isinstance(node.index, int):
             raise ValueError("The index of an array must be an integer.")
+
+        #Array Access Type Mismatch
+        array_obj = self.symbol_table.get_variable(node.name)
+        if not isinstance(array_obj, Array):
+            raise ValueError(f"Invalid array access usage on variable of type {array_obj.type_.name}")
         self.visitChildren(node)
 
     def visitAssignment(self, node: AssignmentNode):
