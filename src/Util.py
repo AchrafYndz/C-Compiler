@@ -51,3 +51,12 @@ def returns_something(node, found):
                 found = True
         found = returns_something(child, found)
     return found
+
+def has_duplicates(arr):
+    seen_values = set()
+    for value in arr:
+        if value in seen_values:
+            return True
+        seen_values.add(value)
+    return False
+
