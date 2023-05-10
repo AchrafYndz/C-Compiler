@@ -1,7 +1,7 @@
 from src.SymbolTable import *
 from src.visitors.ASTVisitor import ASTVisitor
 from src.ast_nodes import *
-from src.Util import auto_cast, TypeEnum, returns_something
+from src.Util import auto_cast, TypeEnum, returns_something, has_duplicates
 
 
 class SemanticAnalysisVisitor(ASTVisitor):
@@ -73,6 +73,11 @@ class SemanticAnalysisVisitor(ASTVisitor):
         if returns_something(node, returns) and type_node.type.type == TypeEnum.VOID:
             raise ValueError("Returning something in void function.")
 
+        # parameter redefinition
+        args = [child.name for child in node.children if isinstance(child, FunctionArgumentNode)]
+        if has_duplicates(args):
+            raise ValueError("Cannot redefine function parameters.")
+
         function_obj = Function(
             name=variable_node.name,
             type_=type_node.type.type,
@@ -134,6 +139,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
             ptr_level=0  # TODO
         )
         self.symbol_table.add_variable(variable_obj)
+
         self.visitChildren(node)
 
     def visitVariable(self, node: VariableNode):
