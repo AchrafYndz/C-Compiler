@@ -23,6 +23,9 @@ class SemanticAnalysisVisitor(ASTVisitor):
                 raise ValueError(
                     f"Incompatible assignment from type {function_obj.type_.name} to {assigned_obj.type_.name}")
 
+        # check if variable is declared
+        self.symbol_table.get_variable(node.name)
+
         self.visitChildren(node)
 
     def visitBinary_expression(self, node: BinaryExpressionNode):
@@ -33,6 +36,11 @@ class SemanticAnalysisVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitBranch(self, node: BranchNode):
+        # return outside of a function
+        parentNode = node.parent
+        if parentNode:
+            if not isinstance(parentNode.parent, FunctionNode):
+                raise ValueError("Cannot return outside of a function.")
         self.visitChildren(node)
 
     def visitConditional(self, node: ConditionalNode):
@@ -74,6 +82,13 @@ class SemanticAnalysisVisitor(ASTVisitor):
             args_count=args_count
         )
         self.symbol_table.add_variable(function_obj)
+
+        # definition of a function in local scope
+        parentNode = node.parent
+        if parentNode:
+            if isinstance(parentNode.parent, FunctionNode):
+                raise ValueError("Cannot define a function in a local scope.")
+
         self.visitChildren(node)
 
     def visitInclude(self, node: IncludeNode):
@@ -82,6 +97,12 @@ class SemanticAnalysisVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitLiteral(self, node: LiteralNode):
+
+        if isinstance(node.parent, UnaryExpressionNode):
+            parentNode = node.parent
+            if parentNode.operator == "*":
+                raise ValueError(f"Cannot dereference a literal of type {node.type.name}")
+
         self.visitChildren(node)
 
     def visitLoop(self, node: LoopNode):
