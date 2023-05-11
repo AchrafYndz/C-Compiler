@@ -48,10 +48,11 @@ class SemanticAnalysisVisitor(ASTVisitor):
             found = False
             if not look_in_parent(node, FunctionNode, found):
                 raise ValueError("Cannot return outside of a function.")
-        if parentNode:
-            # Invalid use of loop control statement.
-            if not isinstance(parentNode.parent, LoopNode) and node.sort != "return":
+        else:
+            found = False
+            if not look_in_parent(node, LoopNode, found):
                 raise ValueError("Invalid use of loop control statement.")
+
         self.visitChildren(node)
 
     def visitConditional(self, node: ConditionalNode):
