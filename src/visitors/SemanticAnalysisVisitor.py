@@ -1,7 +1,7 @@
 from src.SymbolTable import *
 from src.visitors.ASTVisitor import ASTVisitor
 from src.ast_nodes import *
-from src.Util import auto_cast, TypeEnum, returns_something, has_duplicates
+from src.Util import auto_cast, TypeEnum, returns_something, has_duplicates, look_in_parent
 
 
 class SemanticAnalysisVisitor(ASTVisitor):
@@ -42,11 +42,13 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
     def visitBranch(self, node: BranchNode):
         parentNode = node.parent
-        if parentNode:
-            # return outside of a function
-            # node.sort == "return" misschien overbodig
-            if not isinstance(parentNode.parent, FunctionNode) and node.sort == "return":
+
+        # return outside a function
+        if node.sort == "return":
+            found = False
+            if not look_in_parent(node, FunctionNode, found):
                 raise ValueError("Cannot return outside of a function.")
+        if parentNode:
             # Invalid use of loop control statement.
             if not isinstance(parentNode.parent, LoopNode) and node.sort != "return":
                 raise ValueError("Invalid use of loop control statement.")

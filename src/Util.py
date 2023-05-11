@@ -52,6 +52,7 @@ def returns_something(node, found):
         found = returns_something(child, found)
     return found
 
+
 def has_duplicates(arr):
     seen_values = set()
     for value in arr:
@@ -59,4 +60,13 @@ def has_duplicates(arr):
             return True
         seen_values.add(value)
     return False
+
+
+def look_in_parent(node, node_type, found):
+    if node.parent:
+        if isinstance(node.parent, node_type):
+            found = True
+        else:
+            found = look_in_parent(node.parent, node_type, found)
+    return found
 
