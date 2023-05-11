@@ -9,4 +9,4 @@ class LiteralNode(ASTNode):
         self.type: Type = type_
 
     def getLabel(self):
-        return "Literal: " + str(self.value)
+        return "Literal: " + self.value
