@@ -69,7 +69,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
     def visitFunction_call(self, node: FunctionCallNode):
         function_obj = self.symbol_table.get_variable(node.name)
-        if len(node.children) != function_obj.args_count:
+        if function_obj.args_count != -1 and len(node.children) != function_obj.args_count:
             raise ValueError(f"Function {function_obj.name} expected {function_obj.args_count} arguments,"
                              f" got {len(node.children)} instead.")
         self.visitChildren(node)
@@ -105,6 +105,24 @@ class SemanticAnalysisVisitor(ASTVisitor):
     def visitInclude(self, node: IncludeNode):
         if node.to_include != "stdio.h":
             raise ValueError(f"Invalid include of file {node.to_include}")
+        printf_func = Function(
+            name="printf",
+            type_=TypeEnum.INT,
+            is_const=False,
+            is_defined=True,
+            ptr_level=0,
+            args_count=-1
+        )
+        scanf_func = Function(
+            name="scanf",
+            type_=TypeEnum.INT,
+            is_const=False,
+            is_defined=True,
+            ptr_level=0,
+            args_count=-1
+        )
+        self.symbol_table.add_variable(printf_func)
+        self.symbol_table.add_variable(scanf_func)
         self.visitChildren(node)
 
     def visitLiteral(self, node: LiteralNode):
