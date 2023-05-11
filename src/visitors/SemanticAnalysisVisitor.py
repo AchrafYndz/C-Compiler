@@ -100,12 +100,6 @@ class SemanticAnalysisVisitor(ASTVisitor):
         )
         self.symbol_table.add_variable(function_obj)
 
-        # definition of a function in local scope
-        parentNode = node.parent
-        if parentNode:
-            if isinstance(parentNode.parent, FunctionNode):
-                raise ValueError("Cannot define a function in a local scope.")
-
         self.visitChildren(node)
 
     def visitInclude(self, node: IncludeNode):
