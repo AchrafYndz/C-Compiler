@@ -140,13 +140,23 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
     def visitVariable_definition(self, node: VariableDefinitionNode):
         is_defined = len(node.children) == 0
-        variable_obj = Variable(
-            name=node.name,
-            type_=node.type.type,
-            is_const=node.type.is_const,
-            is_defined=is_defined,
-            ptr_level=0  # TODO
-        )
+        if node.is_array:
+            variable_obj = Array(
+                name=node.name,
+                type_=node.type.type,
+                is_const=node.type.is_const,
+                is_defined=is_defined,
+                ptr_level=0,  # TODO
+                array_size=-1  # TODO
+            )
+        else:
+            variable_obj = Variable(
+                name=node.name,
+                type_=node.type.type,
+                is_const=node.type.is_const,
+                is_defined=is_defined,
+                ptr_level=0  # TODO
+            )
         self.symbol_table.add_variable(variable_obj)
 
         self.visitChildren(node)

@@ -151,16 +151,17 @@ class ASTCreator(CListener):
         name = ctx.IDENTIFIER().getText()
         type_declaration_node = self.current_node.children[0]
 
+        is_array = ctx.LBRACK()
+
         if type_declaration_node.type.type:
             type_ = type_declaration_node.type
 
             node = VariableDefinitionNode(
                 name=name,
-                type_=type_
+                type_=type_,
+                is_array=is_array
             )
         else:
-            is_array = ctx.LBRACK()
-
             if is_array:
                 array_index_node = ctx.literal().children[0]
 
