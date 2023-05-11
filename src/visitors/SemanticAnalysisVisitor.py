@@ -159,4 +159,5 @@ class SemanticAnalysisVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitVariable(self, node: VariableNode):
+        self.symbol_table.get_variable(node.name)
         self.visitChildren(node)

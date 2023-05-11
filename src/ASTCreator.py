@@ -171,6 +171,10 @@ class ASTCreator(CListener):
                     name=name,
                     index=array_index
                 )
+            elif len(ctx.children) == 1:
+                node = VariableNode(
+                    name=name
+                )
             else:
                 node = AssignmentNode(name)
 
