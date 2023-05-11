@@ -106,7 +106,8 @@ scope: LBRACE (declaration SEMI| statement | function_declaration)* RBRACE;
 
 declaration: type_declaration variable_definition (COMMA variable_definition)*;
 
-variable_definition: IDENTIFIER (LBRACK literal RBRACK)? (ASS expression)?;
+variable_definition: (IDENTIFIER (LBRACK literal RBRACK)? (ASS expression)?)
+                    | IDENTIFIER LBRACK RBRACK ASS LBRACE (expression (COMMA expression)*)? RBRACE;
 
 statement: scope
            | expression SEMI
