@@ -59,8 +59,11 @@ def test_semantic_analysis():
             # create AST tree
             ast_creator.enterProgram(tree)
             root = ast_creator.root
+
+            root.visualize(filename="semantic_test")
+
             with pytest.raises(Exception) as exception:
                 ast_semantic_visitor = SemanticAnalysisVisitor()
                 # run semantic analysis
                 ast_semantic_visitor.visitChildren(root)
-            print(str(exception.value))
+            print(f"{exception.typename}: {exception.value}")

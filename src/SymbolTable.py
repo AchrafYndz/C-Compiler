@@ -47,7 +47,7 @@ class Scope:
 
         self.table[variable.name] = variable
 
-    def get_variable(self, identifier: str):
+    def get_variable(self, identifier: str, expected: bool = True):
         # search in current scope
         for variable in reversed(self.table.values()):
             if identifier == variable.name:
@@ -56,7 +56,10 @@ class Scope:
         if self.parent_scope and self.parent_scope.get_variable(identifier):
             return self.parent_scope.get_variable(identifier)
 
-        raise ValueError(f"Variable {identifier} not defined.")
+        if expected:
+            raise ValueError(f"Variable {identifier} not defined.")
+        else:
+            return None
 
     def check_is_assigned(self, identifier: str):
         return self.get_variable(identifier).is_assigned
@@ -106,9 +109,9 @@ class SymbolTable:
         assert (self.current_scope is not None)
         self.current_scope.add_variable(variable)
 
-    def get_variable(self, identifier: str):
+    def get_variable(self, identifier: str, expected: bool = True):
         assert (self.current_scope is not None)
-        return self.current_scope.get_variable(identifier=identifier)
+        return self.current_scope.get_variable(identifier=identifier, expected=expected)
 
     def get_scope(self, name: str):
         for scope in self.scopes:

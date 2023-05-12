@@ -90,15 +90,37 @@ class SemanticAnalysisVisitor(ASTVisitor):
         if has_duplicates(args):
             raise ValueError("Cannot redefine function parameters.")
 
-        function_obj = Function(
-            name=variable_node.name,
-            type_=type_node.type.type,
-            is_const=type_node.type.is_const,
-            is_defined=is_defined,
-            ptr_level=0,  # TODO: Determine this
-            args_count=args_count
-        )
-        self.symbol_table.add_variable(function_obj)
+        # definition of predeclared function
+        forward_declaration: Function = self.symbol_table.get_variable(variable_node.name, expected=False)
+        if forward_declaration:
+            # make sure it is not redefined
+            if forward_declaration.is_assigned:
+                raise ValueError(f"Redefinition of function {variable_node.name}")
+
+            # make sure it has the same return value
+            if forward_declaration.type_ != type_node.type.type:
+                raise ValueError(f"Definition of forward declared function {variable_node.name} "
+                                 f"has a different return type.")
+
+            # make sure it has the same number of arguments
+            if forward_declaration.args_count != args_count:
+                raise ValueError(f"Definition of forward declared function {variable_node.name} "
+                                 f"expected {forward_declaration.args_count} arguments, got {args_count} instead.")
+
+            self.symbol_table.alter_identifier(
+                name=variable_node.name,
+                is_assigned=True
+            )
+        else:
+            function_obj = Function(
+                name=variable_node.name,
+                type_=type_node.type.type,
+                is_const=type_node.type.is_const,
+                is_defined=is_defined,
+                ptr_level=0,  # TODO: Determine this
+                args_count=args_count
+            )
+            self.symbol_table.add_variable(function_obj)
 
         self.visitChildren(node)
 
