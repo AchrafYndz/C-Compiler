@@ -178,6 +178,11 @@ class SemanticAnalysisVisitor(ASTVisitor):
     def visitVariable_definition(self, node: VariableDefinitionNode):
         is_defined = len(node.children) == 0
         if node.is_array:
+            # Check that the array size is an integer
+            if node.has_array_size:
+                array_size_node: LiteralNode = node.children[0]
+                if not isinstance(array_size_node.value, int):
+                    raise ValueError("Array size should be of type int")
             variable_obj = Array(
                 name=node.name,
                 type_=node.type.type,

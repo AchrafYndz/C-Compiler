@@ -152,6 +152,7 @@ class ASTCreator(CListener):
         type_declaration_node = self.current_node.children[0]
 
         is_array = ctx.LBRACK()
+        has_array_size = not ctx.LBRACE()
 
         if type_declaration_node.type.type:
             type_ = type_declaration_node.type
@@ -159,7 +160,8 @@ class ASTCreator(CListener):
             node = VariableDefinitionNode(
                 name=name,
                 type_=type_,
-                is_array=is_array
+                is_array=is_array,
+                has_array_size=has_array_size
             )
         else:
             if is_array:
