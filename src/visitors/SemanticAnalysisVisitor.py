@@ -181,8 +181,8 @@ class SemanticAnalysisVisitor(ASTVisitor):
             # Check that the array size is an integer
             if node.has_array_size:
                 array_size_node: LiteralNode = node.children[0]
-                if not isinstance(array_size_node.value, int):
-                    raise ValueError("Array size should be of type int")
+                if array_size_node.type != TypeEnum.INT:
+                    raise ValueError("Array index should be of type int")
             variable_obj = Array(
                 name=node.name,
                 type_=node.type.type,
