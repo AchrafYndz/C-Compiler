@@ -13,7 +13,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
         if not isinstance(node.index, int):
             raise ValueError("The index of an array must be an integer.")
 
-        #Array Access Type Mismatch
+        # Array Access Type Mismatch
         array_obj = self.symbol_table.get_variable(node.name)
         if not isinstance(array_obj, Array):
             raise ValueError(f"Invalid array access usage on variable of type {array_obj.type_.name}")
@@ -161,6 +161,22 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
     def visitScope(self, node: ScopeNode):
         self.symbol_table.add_scope(scope=Scope())
+
+        # Add arguments
+        parent_node = node.parent
+        if isinstance(parent_node, FunctionNode):
+            argument_nodes = parent_node.children[2:-1]
+            for arg_node in argument_nodes:
+                variable_obj = Variable(
+                    name=arg_node.name,
+                    type_=arg_node.type.type,
+                    is_const=arg_node.type.is_const,
+                    is_defined=True,
+                    ptr_level=0  # TODO
+                )
+
+                self.symbol_table.add_variable(variable_obj)
+
         self.visitChildren(node)
         self.symbol_table.leave_scope()
 

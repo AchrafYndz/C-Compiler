@@ -53,8 +53,8 @@ class Scope:
             if identifier == variable.name:
                 return self.table[identifier]
         # search in parent scope too
-        if self.parent_scope and self.parent_scope.get_variable(identifier):
-            return self.parent_scope.get_variable(identifier)
+        if self.parent_scope and self.parent_scope.get_variable(identifier, expected):
+            return self.parent_scope.get_variable(identifier, expected)
 
         if expected:
             raise ValueError(f"Variable {identifier} not defined.")
