@@ -1,4 +1,5 @@
 from enum import Enum
+import re
 
 from src.ast_nodes.BranchNode import BranchNode
 
@@ -69,4 +70,16 @@ def look_in_parent(node, node_type, found):
         else:
             found = look_in_parent(node.parent, node_type, found)
     return found
+
+
+def extract_print_types(print_types):
+    regex = r'%[idscf]'
+    matches = re.findall(regex, print_types)
+    return matches
+
+
+def extract_scan_types(scan_types):
+    regex = r'%[0-9]*[idscf]'
+    matches = re.findall(regex, scan_types)
+    return matches
 
