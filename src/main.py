@@ -34,7 +34,7 @@ def main(argv):
     ast_semantic_visitor = SemanticAnalysisVisitor()
 
     # run semantic analysis
-    ast_semantic_visitor.visitChildren(root)
+    ast_semantic_visitor.visitScope(root)
 
     ast = AST(root)
 

@@ -9,6 +9,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
     def __init__(self):
         super().__init__()
         self.symbol_table: SymbolTable = SymbolTable()
+        self.found_main = False
 
     def visitArray_assignment(self, node: ArrayAssignmentNode):
         if not isinstance(node.index, int):
@@ -101,6 +102,9 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
         args_nodes = [child for child in node.children if isinstance(child, FunctionArgumentNode)]
         args_count = len(args_nodes)
+
+        if variable_node.name == "main" and type_node.type.type.name == "INT" and args_count == 0:
+            self.found_main = True
 
         returns = False
         if returns_something(node, returns) and type_node.type.type == TypeEnum.VOID:
@@ -217,6 +221,10 @@ class SemanticAnalysisVisitor(ASTVisitor):
                 self.symbol_table.add_variable(variable_obj)
 
         self.visitChildren(node)
+
+        if not node.parent and not self.found_main:
+            raise ValueError("Main not defined")
+
         self.symbol_table.leave_scope()
 
     def visitType_declaration(self, node: TypeDeclarationNode):
