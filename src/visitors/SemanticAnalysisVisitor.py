@@ -11,6 +11,14 @@ class SemanticAnalysisVisitor(ASTVisitor):
         self.symbol_table: SymbolTable = SymbolTable()
         self.found_main = False
 
+    def check_is_defined(self, nodes, expression_type):
+        for node in nodes:
+            if isinstance(node, VariableNode):
+                var_name = node.name
+                var_obj = self.symbol_table.get_variable(var_name)
+                if not var_obj.is_assigned:
+                    raise ValueError(f"Undefined variable {var_name} cannot be used in {expression_type}")
+
     def visitArray_assignment(self, node: ArrayAssignmentNode):
         if not isinstance(node.index, int):
             raise ValueError("The index of an array must be an integer.")
@@ -23,6 +31,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
     def visitAssignment(self, node: AssignmentNode):
         assignee = node.children[0]
+        self.check_is_defined([assignee], "assignment")
         if isinstance(assignee, FunctionCallNode):
             function_obj = self.symbol_table.get_variable(assignee.name)
             assigned_obj = self.symbol_table.get_variable(node.name)
@@ -31,7 +40,8 @@ class SemanticAnalysisVisitor(ASTVisitor):
                     f"Incompatible assignment from type {function_obj.type_.name} to {assigned_obj.type_.name}")
 
         # check if variable is declared
-        self.symbol_table.get_variable(node.name)
+        self.symbol_table.get_variable(node.name, expected=True)
+        self.symbol_table.alter_identifier(node.name, is_assigned=True)
 
         self.visitChildren(node)
 
@@ -61,6 +71,8 @@ class SemanticAnalysisVisitor(ASTVisitor):
                     var_obj = self.symbol_table.get_variable(var_name)
                     if var_obj.isArray():
                         raise ValueError(f"Cannot use array in binary operation")
+        # Check that all variables used are defined
+        self.check_is_defined(leaves, "binary expression")
 
         self.visitChildren(node)
 
@@ -72,6 +84,10 @@ class SemanticAnalysisVisitor(ASTVisitor):
             found = False
             if not look_in_parent(node, FunctionNode, found):
                 raise ValueError("Cannot return outside of a function.")
+
+            if node.children:
+                to_return = node.children[0]
+                self.check_is_defined([to_return], "return statement")
         else:
             found = False
             if not look_in_parent(node, LoopNode, found):
@@ -93,6 +109,10 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
     def visitFunction_call(self, node: FunctionCallNode):
         function_obj = self.symbol_table.get_variable(node.name)
+        leaves = []
+        extract_leaves(node, leaves)
+        self.check_is_defined(leaves, "function call")
+
         if function_obj.args and len(node.children) != len(function_obj.args):
             raise ValueError(f"Function {function_obj.name} expected {len(function_obj.args)} arguments,"
                              f" got {len(node.children)} instead.")
@@ -257,10 +277,12 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
     def visitUnary_expression(self, node: UnaryExpressionNode):
         operand_node = node.children[0]
+        self.check_is_defined([operand_node], "unary expression")
         if node.operator in ["&", "++", "--"]:
             if not isinstance(operand_node, VariableNode) and \
                     not (isinstance(operand_node, UnaryExpressionNode) and operand_node.operator == "*"):
                 raise ValueError("Dereference expected lvalue")
+
         self.visitChildren(node)
 
     def visitVariable_definition(self, node: VariableDefinitionNode):
@@ -291,6 +313,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
                 left_type = node.type.type.value
                 leaves = []
                 extract_leaves(node, leaves)
+                self.check_is_defined(leaves, "variable definition")
                 right_type = -1
                 for leaf in leaves:
                     if isinstance(leaf, LiteralNode):
