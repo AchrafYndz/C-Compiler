@@ -65,5 +65,5 @@ def test_semantic_analysis():
             with pytest.raises(Exception) as exception:
                 ast_semantic_visitor = SemanticAnalysisVisitor()
                 # run semantic analysis
-                ast_semantic_visitor.visitChildren(root)
+                ast_semantic_visitor.visitScope(root)
             print(f"{exception.typename}: {exception.value}")
