@@ -83,3 +83,11 @@ def extract_scan_types(scan_types):
     matches = re.findall(regex, scan_types)
     return matches
 
+
+def extract_leaves(node, leaves):
+    if not node.children:
+        leaves.append(node)
+    else:
+        for child in node.children:
+            extract_leaves(child, leaves)
+
