@@ -2,7 +2,7 @@ from src.SymbolTable import *
 from src.visitors.ASTVisitor import ASTVisitor
 from src.ast_nodes import *
 from src.Util import auto_cast, TypeEnum, returns_something, has_duplicates, look_in_parent, extract_print_types, \
-    extract_scan_types
+    extract_scan_types, extract_leaves
 
 
 class SemanticAnalysisVisitor(ASTVisitor):
@@ -89,11 +89,12 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
                 # Make sure type of argument matches
                 for func_type, arg_node in zip(func_types, node.children[1:]):
-                    if "s" in func_type and arg_node.type.name != "STRING":
-                        raise ValueError(f"{function_obj.name} expected {func_type}, but did not get a string")
+                    if isinstance(arg_node, LiteralNode) or isinstance(arg_node, VariableNode):
+                        if "s" in func_type and arg_node.type.name != "STRING":
+                            raise ValueError(f"{function_obj.name} expected {func_type}, but did not get a string")
 
-                    if arg_node.type.name == "STRING" and "s" not in func_type:
-                        raise ValueError(f"{function_obj.name} expected {func_type}, but got a string instead")
+                        if arg_node.type.name == "STRING" and "s" not in func_type:
+                            raise ValueError(f"{function_obj.name} expected {func_type}, but got a string instead")
 
         self.visitChildren(node)
 
@@ -234,14 +235,14 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
     def visitUnary_expression(self, node: UnaryExpressionNode):
         operand_node = node.children[0]
-        if node.operator == "&":
+        if node.operator in ["&", "++", "--"]:
             if not isinstance(operand_node, VariableNode) and \
                     not (isinstance(operand_node, UnaryExpressionNode) and operand_node.operator == "*"):
                 raise ValueError("Dereference expected lvalue")
         self.visitChildren(node)
 
     def visitVariable_definition(self, node: VariableDefinitionNode):
-        is_defined = len(node.children) == 0
+        is_defined = len(node.children) > 0
         if node.is_array:
             # Check that the array size is an integer
             if node.has_array_size:
@@ -264,6 +265,24 @@ class SemanticAnalysisVisitor(ASTVisitor):
                 is_defined=is_defined,
                 ptr_level=0  # TODO
             )
+            if is_defined:
+                left_type = node.type.type.value
+                leaves = []
+                extract_leaves(node, leaves)
+                right_type = -1
+                for leaf in leaves:
+                    if isinstance(leaf, LiteralNode):
+                        if leaf.type.value > right_type:
+                            right_type = leaf.type.value
+                    elif isinstance(leaf, VariableNode):
+                        var_name = leaf.name
+                        var_obj = self.symbol_table.get_variable(var_name)
+                        if var_obj.type_.value > right_type:
+                            right_type = var_obj.type_.value
+
+                if left_type < right_type:
+                    print(f"Implicit conversion from {TypeEnum(right_type).name} to {TypeEnum(left_type).name}")
+
         self.symbol_table.add_variable(variable_obj)
 
         self.visitChildren(node)
