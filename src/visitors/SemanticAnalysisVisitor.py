@@ -69,8 +69,8 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
     def visitFunction_call(self, node: FunctionCallNode):
         function_obj = self.symbol_table.get_variable(node.name)
-        if function_obj.args_count != -1 and len(node.children) != function_obj.args_count:
-            raise ValueError(f"Function {function_obj.name} expected {function_obj.args_count} arguments,"
+        if function_obj.args and len(node.children) != len(function_obj.args):
+            raise ValueError(f"Function {function_obj.name} expected {len(function_obj.args)} arguments,"
                              f" got {len(node.children)} instead.")
         self.visitChildren(node)
 
@@ -152,7 +152,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
             is_const=False,
             is_defined=True,
             ptr_level=0,
-            args_count=-1
+            args=None
         )
         scanf_func = Function(
             name="scanf",
@@ -160,7 +160,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
             is_const=False,
             is_defined=True,
             ptr_level=0,
-            args_count=-1
+            args=None
         )
         self.symbol_table.add_variable(printf_func)
         self.symbol_table.add_variable(scanf_func)
