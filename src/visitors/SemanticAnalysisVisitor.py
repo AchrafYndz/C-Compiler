@@ -79,19 +79,21 @@ class SemanticAnalysisVisitor(ASTVisitor):
             if len(node.children) > 1:
                 arguments_node: LiteralNode = node.children[0]
                 arguments_string = arguments_node.value
-                if node.name == "printf":
-                    print_types = extract_print_types(arguments_string)
-                    if len(print_types) != len(node.children[1:]):
-                        raise ValueError(f"printf function expected {len(print_types)} arguments, "
-                                         f"got {len(node.children[1:])}")
 
-                elif node.name == "scanf":
-                    scan_types = extract_scan_types(arguments_string)
-                    if len(scan_types) != len(node.children[1:]):
-                        raise ValueError(f"scanf function expected {len(scan_types)} arguments, "
-                                         f"got {len(node.children[1:])}")
-                else:
-                    raise ValueError("Expected scanf or printf")
+                func_types = extract_print_types(arguments_string) if node.name == "printf" else extract_scan_types(arguments_string)
+
+                # Make sure same amount of arguments
+                if len(func_types) != len(node.children[1:]):
+                    raise ValueError(f"printf function expected {len(func_types)} arguments, "
+                                     f"got {len(node.children[1:])}")
+
+                # Make sure type of argument matches
+                for func_type, arg_node in zip(func_types, node.children[1:]):
+                    if "s" in func_type and arg_node.type.name != "STRING":
+                        raise ValueError(f"{function_obj.name} expected {func_type}, but did not get a string")
+
+                    if arg_node.type.name == "STRING" and "s" not in func_type:
+                        raise ValueError(f"{function_obj.name} expected {func_type}, but got a string instead")
 
         self.visitChildren(node)
 
