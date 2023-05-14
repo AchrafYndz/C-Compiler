@@ -40,6 +40,28 @@ class SemanticAnalysisVisitor(ASTVisitor):
             index_node: LiteralNode = node.children[1]
             if not isinstance(auto_cast(index_node.value), int):
                 raise ValueError("The index of an array must be an integer.")
+        leaves = []
+        extract_leaves(node, leaves)
+        # Binary operation between 2 or more pointers
+        if node.operator in ["+", "-", "*", "/", "%"]:
+            pointer_vars = 0
+            for leaf in leaves:
+                if isinstance(leaf, VariableNode):
+                    var_name = leaf.name
+                    var_obj = self.symbol_table.get_variable(var_name)
+                    if var_obj.ptr_level > 0:
+                        pointer_vars += 1
+            if pointer_vars >= 2:
+                raise ValueError(f"Invalid operands to binary `{node.operator}` between {pointer_vars} pointers.")
+        # Binary operation with at least one array
+        if node.operator != "[]":
+            for leaf in leaves:
+                if isinstance(leaf, VariableNode):
+                    var_name = leaf.name
+                    var_obj = self.symbol_table.get_variable(var_name)
+                    if var_obj.isArray():
+                        raise ValueError(f"Cannot use array in binary operation")
+
         self.visitChildren(node)
 
     def visitBranch(self, node: BranchNode):
@@ -155,7 +177,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
                         type_=arg_node.type.type,
                         is_const=arg_node.type.is_const,
                         is_defined=True,
-                        ptr_level=0
+                        ptr_level=arg_node.type.pointer_level
                     )
                 )
             function_obj = Function(
@@ -163,7 +185,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
                 type_=type_node.type.type,
                 is_const=type_node.type.is_const,
                 is_defined=is_defined,
-                ptr_level=0,  # TODO: Determine this
+                ptr_level=type_node.type.pointer_level,
                 args=args_objs
             )
             self.symbol_table.add_variable(function_obj)
@@ -218,7 +240,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
                     type_=arg_node.type.type,
                     is_const=arg_node.type.is_const,
                     is_defined=True,
-                    ptr_level=0  # TODO
+                    ptr_level=arg_node.type.pointer_level
                 )
 
                 self.symbol_table.add_variable(variable_obj)
@@ -254,7 +276,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
                 type_=node.type.type,
                 is_const=node.type.is_const,
                 is_defined=is_defined,
-                ptr_level=0,  # TODO
+                ptr_level=node.type.pointer_level,
                 array_size=-1  # TODO
             )
         else:
@@ -263,7 +285,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
                 type_=node.type.type,
                 is_const=node.type.is_const,
                 is_defined=is_defined,
-                ptr_level=0  # TODO
+                ptr_level=node.type.pointer_level
             )
             if is_defined:
                 left_type = node.type.type.value
