@@ -1,7 +1,8 @@
 from src.SymbolTable import *
 from src.visitors.ASTVisitor import ASTVisitor
 from src.ast_nodes import *
-from src.Util import auto_cast, TypeEnum, returns_something, has_duplicates, look_in_parent
+from src.Util import auto_cast, TypeEnum, returns_something, has_duplicates, look_in_parent, extract_print_types, \
+    extract_scan_types
 
 
 class SemanticAnalysisVisitor(ASTVisitor):
@@ -72,6 +73,25 @@ class SemanticAnalysisVisitor(ASTVisitor):
         if function_obj.args and len(node.children) != len(function_obj.args):
             raise ValueError(f"Function {function_obj.name} expected {len(function_obj.args)} arguments,"
                              f" got {len(node.children)} instead.")
+        if not function_obj.args:
+            # printf or scanf
+            if len(node.children) > 1:
+                arguments_node: LiteralNode = node.children[0]
+                arguments_string = arguments_node.value
+                if node.name == "printf":
+                    print_types = extract_print_types(arguments_string)
+                    if len(print_types) != len(node.children[1:]):
+                        raise ValueError(f"printf function expected {len(print_types)} arguments, "
+                                         f"got {len(node.children[1:])}")
+
+                elif node.name == "scanf":
+                    scan_types = extract_scan_types(arguments_string)
+                    if len(scan_types) != len(node.children[1:]):
+                        raise ValueError(f"scanf function expected {len(scan_types)} arguments, "
+                                         f"got {len(node.children[1:])}")
+                else:
+                    raise ValueError("Expected scanf or printf")
+
         self.visitChildren(node)
 
     def visitFunction(self, node: FunctionNode):
