@@ -26,7 +26,7 @@ class Type:
                 result += "const "
             result += self.type.name + (" *" * self.pointer_level)
         elif self.array_size:
-            result = f'{self.type.__str__()}[{self.array_size}]'
+            result = f'{self.type.name}[{self.array_size}]'
         else:
             result = ""
             if self.is_const:
