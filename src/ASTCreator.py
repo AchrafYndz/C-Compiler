@@ -138,6 +138,7 @@ class ASTCreator(CListener):
         type_obj = Type(type_)
         if ctx.CONST():
             type_obj.is_const = True
+        type_obj.pointer_level = len(ctx.MUL_PTR())
 
         node = TypeDeclarationNode(type_obj)
 

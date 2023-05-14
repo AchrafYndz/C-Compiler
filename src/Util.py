@@ -15,15 +15,16 @@ class TypeEnum(Enum):
 class Type:
     def __init__(self, type_):
         self.is_const = False
-        self.is_pointer = False
+        self.pointer_level = 0
         self.array_size = 0
         self.type: TypeEnum or None = type_
 
     def __str__(self):
-        if self.is_pointer:
-            result = self.type.__str__() + " *"
+        if self.pointer_level:
+            result = ""
             if self.is_const:
-                result += " const"
+                result += "const "
+            result += self.type.name + (" *" * self.pointer_level)
         elif self.array_size:
             result = f'{self.type.__str__()}[{self.array_size}]'
         else:
