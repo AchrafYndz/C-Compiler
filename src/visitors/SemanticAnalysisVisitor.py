@@ -79,15 +79,16 @@ class SemanticAnalysisVisitor(ASTVisitor):
         variable_node = node.children[1]
         is_defined = isinstance(node.children[-1], ScopeNode)
 
-        args_count = len([child for child in node.children if isinstance(child, FunctionArgumentNode)])
+        args_nodes = [child for child in node.children if isinstance(child, FunctionArgumentNode)]
+        args_count = len(args_nodes)
 
         returns = False
         if returns_something(node, returns) and type_node.type.type == TypeEnum.VOID:
             raise ValueError("Returning something in void function.")
 
         # parameter redefinition
-        args = [child.name for child in node.children if isinstance(child, FunctionArgumentNode)]
-        if has_duplicates(args):
+        args_names = [child.name for child in node.children if isinstance(child, FunctionArgumentNode)]
+        if has_duplicates(args_names):
             raise ValueError("Cannot redefine function parameters.")
 
         # definition of predeclared function
@@ -105,20 +106,38 @@ class SemanticAnalysisVisitor(ASTVisitor):
             # make sure it has the same number of arguments
             if forward_declaration.args_count != args_count:
                 raise ValueError(f"Definition of forward declared function {variable_node.name} "
-                                 f"expected {forward_declaration.args_count} arguments, got {args_count} instead.")
+                                 f"expected {len(forward_declaration.args)} arguments, got {args_count} instead.")
+
+            # make sure the type of the arguments is the same
+            for index, (previous_variable, current_node) in enumerate(zip(forward_declaration.args, args_nodes)):
+                if previous_variable.type_ != current_node.type.type:
+                    raise ValueError(f"Definition of forward declared function {variable_node.name} "
+                                    f"expected argument {index+1} to be type {previous_variable.type_.name}, "
+                                     f"got {current_node.type.type.name} instead.")
 
             self.symbol_table.alter_identifier(
                 name=variable_node.name,
                 is_assigned=True
             )
         else:
+            args_objs = []
+            for arg_node in args_nodes:
+                args_objs.append(
+                    Variable(
+                        name=arg_node.name,
+                        type_=arg_node.type.type,
+                        is_const=arg_node.type.is_const,
+                        is_defined=True,
+                        ptr_level=0
+                    )
+                )
             function_obj = Function(
                 name=variable_node.name,
                 type_=type_node.type.type,
                 is_const=type_node.type.is_const,
                 is_defined=is_defined,
                 ptr_level=0,  # TODO: Determine this
-                args_count=args_count
+                args=args_objs
             )
             self.symbol_table.add_variable(function_obj)
 

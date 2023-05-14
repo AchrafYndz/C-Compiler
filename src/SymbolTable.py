@@ -23,7 +23,7 @@ class Array(Variable):
 
 
 class Function(Variable):
-    def __init__(self, name="", type_="", is_const=False, is_defined=False, ptr_level=0, args_count=0):
+    def __init__(self, name="", type_="", is_const=False, is_defined=False, ptr_level=0, args: list[Variable] = None):
         super().__init__(name, type_, is_const, is_defined, ptr_level)
         self.args_count = args_count
 
