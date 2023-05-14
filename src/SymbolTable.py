@@ -25,7 +25,7 @@ class Array(Variable):
 class Function(Variable):
     def __init__(self, name="", type_="", is_const=False, is_defined=False, ptr_level=0, args: list[Variable] = None):
         super().__init__(name, type_, is_const, is_defined, ptr_level)
-        self.args_count = args_count
+        self.args = args
 
     def isFunction(self):
         return True
@@ -67,7 +67,7 @@ class Scope:
     def check_is_const(self, identifier: str):
         return self.get_variable(identifier).is_const
 
-    def alter_identifier(self, name, type_=None, is_const=None, is_assigned=None, ptr_level=None, array_size=None, args_count=None):
+    def alter_identifier(self, name, type_=None, is_const=None, is_assigned=None, ptr_level=None, array_size=None, args=None):
         previous_variable = self.get_variable(name)
 
         new_type = type_ if type_ else previous_variable.type_
@@ -80,9 +80,9 @@ class Scope:
             self.table[name] = \
                 Array(name, new_type, new_is_const, new_is_assigned, new_ptr_level, new_array_size)
         elif previous_variable.isFunction():
-            new_args_count = args_count if args_count else previous_variable.args_count
+            new_args = args if args else previous_variable.args
             self.table[name] = \
-                Function(name, new_type, new_is_const, new_is_assigned, new_ptr_level)
+                Function(name, new_type, new_is_const, new_is_assigned, new_ptr_level, new_args)
         else:
             self.table[name] = \
                 Variable(name, new_type, new_is_const, new_is_assigned, new_ptr_level)
@@ -129,5 +129,5 @@ class SymbolTable:
         assert (self.current_scope is not None)
         return self.current_scope.check_is_assigned(identifier)
 
-    def alter_identifier(self, name, type_=None, is_const=None, is_assigned=None, ptr_level=None, array_size=None, args_count=None):
-        self.current_scope.alter_identifier(name, type_, is_const, is_assigned, ptr_level, array_size, args_count)
+    def alter_identifier(self, name, type_=None, is_const=None, is_assigned=None, ptr_level=None, array_size=None, args=None):
+        self.current_scope.alter_identifier(name, type_, is_const, is_assigned, ptr_level, array_size, args)

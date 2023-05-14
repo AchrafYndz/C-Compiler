@@ -104,7 +104,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
                                  f"has a different return type.")
 
             # make sure it has the same number of arguments
-            if forward_declaration.args_count != args_count:
+            if len(forward_declaration.args) != args_count:
                 raise ValueError(f"Definition of forward declared function {variable_node.name} "
                                  f"expected {len(forward_declaration.args)} arguments, got {args_count} instead.")
 
