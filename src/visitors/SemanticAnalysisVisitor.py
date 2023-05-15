@@ -111,7 +111,8 @@ class SemanticAnalysisVisitor(ASTVisitor):
         function_obj = self.symbol_table.get_variable(node.name)
         leaves = []
         extract_leaves(node, leaves)
-        self.check_is_defined(leaves, "function call")
+        if not function_obj.name == "scanf":
+            self.check_is_defined(leaves, "function call")
 
         if function_obj.args and len(node.children) != len(function_obj.args):
             raise ValueError(f"Function {function_obj.name} expected {len(function_obj.args)} arguments,"
@@ -136,6 +137,11 @@ class SemanticAnalysisVisitor(ASTVisitor):
                     elif isinstance(arg_node, VariableNode):
                         var_name = arg_node.name
                         var_obj = self.symbol_table.get_variable(var_name)
+
+                        # mark as defined after scanf
+                        if function_obj.name == "scanf":
+                            self.symbol_table.alter_identifier(var_name, is_assigned=True)
+
                         arg_type = var_obj.type_.name
                         if var_obj.isArray():
                             arg_type += "[]"
@@ -146,6 +152,9 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
                     if arg_type in ["STRING", "CHAR[]"] and "s" not in func_type:
                         raise ValueError(f"{function_obj.name} expected {func_type}, but got a string instead")
+
+
+
 
         self.visitChildren(node)
 
