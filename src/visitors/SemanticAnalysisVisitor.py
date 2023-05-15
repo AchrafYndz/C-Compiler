@@ -307,7 +307,8 @@ class SemanticAnalysisVisitor(ASTVisitor):
         self.check_is_defined([operand_node], "unary expression")
         if node.operator in ["&", "++", "--"]:
             if not isinstance(operand_node, VariableNode) and \
-                    not (isinstance(operand_node, UnaryExpressionNode) and operand_node.operator == "*"):
+                    not (isinstance(operand_node, UnaryExpressionNode) and operand_node.operator == "*")\
+                    and not (isinstance(operand_node, BinaryExpressionNode) and operand_node.operator == "[]"):
                 raise ValueError("Dereference expected lvalue")
 
         self.visitChildren(node)
