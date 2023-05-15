@@ -34,6 +34,10 @@ def test_ast_creation():
             ast_creator.enterProgram(tree)
             root = ast_creator.root
 
+            ast_semantic_visitor = SemanticAnalysisVisitor()
+            # run semantic analysis
+            ast_semantic_visitor.visitScope(root)
+
 
 def test_semantic_analysis():
     directory = 'tests/input/semantic_errors'
