@@ -47,9 +47,10 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
     def visitBinary_expression(self, node: BinaryExpressionNode):
         if node.operator == "[]":
-            index_node: LiteralNode = node.children[1]
-            if not isinstance(auto_cast(index_node.value), int):
-                raise ValueError("The index of an array must be an integer.")
+            index_node = node.children[1]
+            if isinstance(index_node, LiteralNode):
+                if not isinstance(auto_cast(index_node.value), int):
+                    raise ValueError("The index of an array must be an integer.")
         leaves = []
         extract_leaves(node, leaves)
         # Binary operation between 2 or more pointers
