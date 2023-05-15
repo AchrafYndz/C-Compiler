@@ -1,39 +1,8 @@
-from enum import Enum
 import re
 
 from src.ast_nodes.BranchNode import BranchNode
-
-
-class TypeEnum(Enum):
-    VOID = -1
-    CHAR = 1
-    INT = 2
-    FLOAT = 3
-    STRING = 4
-
-
-class Type:
-    def __init__(self, type_):
-        self.is_const = False
-        self.pointer_level = 0
-        self.array_size = 0
-        self.type: TypeEnum or None = type_
-
-    def __str__(self):
-        if self.pointer_level:
-            result = ""
-            if self.is_const:
-                result += "const "
-            result += self.type.name + (" *" * self.pointer_level)
-        elif self.array_size:
-            result = f'{self.type.name}[{self.array_size}]'
-        else:
-            result = ""
-            if self.is_const:
-                result += "const "
-            result += TypeEnum(self.type).name
-
-        return result
+from src.ast_nodes.LiteralNode import LiteralNode
+from src.ast_nodes.VariableNode import VariableNode
 
 
 def auto_cast(value):
@@ -92,3 +61,18 @@ def extract_leaves(node, leaves):
         for child in node.children:
             extract_leaves(child, leaves)
 
+
+def get_type(node, symbol_table):
+    leaves = []
+    extract_leaves(node, leaves)
+    type_ = -1
+    for leaf in leaves:
+        if isinstance(leaf, LiteralNode):
+            if leaf.type.value > type_:
+                type_ = leaf.type.value
+        elif isinstance(leaf, VariableNode):
+            var_name = leaf.name
+            var_obj = symbol_table.get_variable(var_name)
+            if var_obj.type_.value > type_:
+                type_ = var_obj.type_.value
+    return type_

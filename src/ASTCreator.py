@@ -1,7 +1,8 @@
 from src.antlr.CParser import CParser
 from src.antlr.CListener import CListener
 from src.ast_nodes import *
-from src.Util import TypeEnum, Type, auto_cast
+from src.Type import TypeEnum, Type
+from src.Util import auto_cast
 
 
 class ASTCreator(CListener):

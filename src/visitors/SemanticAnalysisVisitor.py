@@ -1,8 +1,8 @@
 from src.SymbolTable import *
-from src.visitors.ASTVisitor import ASTVisitor
-from src.ast_nodes import *
-from src.Util import auto_cast, TypeEnum, returns_something, has_duplicates, look_in_parent, extract_print_types, \
-    extract_scan_types, extract_leaves
+from src.visitors.ASTVisitor import *
+from src.Util import auto_cast, returns_something, has_duplicates, look_in_parent, extract_print_types, \
+    extract_scan_types, extract_leaves, get_type
+from src.Type import TypeEnum
 
 
 class SemanticAnalysisVisitor(ASTVisitor):
@@ -161,9 +161,6 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
                     if arg_type in ["STRING", "CHAR[]"] and "s" not in func_type:
                         raise ValueError(f"{function_obj.name} expected {func_type}, but got a string instead")
-
-
-
 
         self.visitChildren(node)
 
@@ -338,20 +335,22 @@ class SemanticAnalysisVisitor(ASTVisitor):
                 ptr_level=node.type.pointer_level
             )
             if is_defined:
-                left_type = node.type.type.value
                 leaves = []
                 extract_leaves(node, leaves)
                 self.check_is_defined(leaves, "variable definition")
-                right_type = -1
-                for leaf in leaves:
-                    if isinstance(leaf, LiteralNode):
-                        if leaf.type.value > right_type:
-                            right_type = leaf.type.value
-                    elif isinstance(leaf, VariableNode):
-                        var_name = leaf.name
-                        var_obj = self.symbol_table.get_variable(var_name)
-                        if var_obj.type_.value > right_type:
-                            right_type = var_obj.type_.value
+
+                left_type = node.type.type.value
+                right_type = get_type(node, self.symbol_table)
+                # right_type = -1
+                # for leaf in leaves:
+                #     if isinstance(leaf, LiteralNode):
+                #         if leaf.type.value > right_type:
+                #             right_type = leaf.type.value
+                #     elif isinstance(leaf, VariableNode):
+                #         var_name = leaf.name
+                #         var_obj = self.symbol_table.get_variable(var_name)
+                #         if var_obj.type_.value > right_type:
+                #             right_type = var_obj.type_.value
 
                 if left_type < right_type:
                     print(f"Implicit conversion from {TypeEnum(right_type).name} to {TypeEnum(left_type).name}")

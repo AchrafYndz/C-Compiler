@@ -1,5 +1,5 @@
 from src.ast_nodes.ASTNode import ASTNode
-from src.Util import Type
+from src.Type import Type
 
 
 class TypeDeclarationNode(ASTNode):
