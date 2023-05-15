@@ -131,12 +131,21 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
                 # Make sure type of argument matches
                 for func_type, arg_node in zip(func_types, node.children[1:]):
-                    if isinstance(arg_node, LiteralNode) or isinstance(arg_node, VariableNode):
-                        if "s" in func_type and arg_node.type.name != "STRING":
-                            raise ValueError(f"{function_obj.name} expected {func_type}, but did not get a string")
+                    if isinstance(arg_node, LiteralNode):
+                        arg_type = arg_node.type.name
+                    elif isinstance(arg_node, VariableNode):
+                        var_name = arg_node.name
+                        var_obj = self.symbol_table.get_variable(var_name)
+                        arg_type = var_obj.type_.name
+                        if var_obj.isArray():
+                            arg_type += "[]"
+                    else:
+                        continue
+                    if "s" in func_type and arg_type not in ["STRING", "CHAR[]"]:
+                        raise ValueError(f"{function_obj.name} expected {func_type}, but did not get a string")
 
-                        if arg_node.type.name == "STRING" and "s" not in func_type:
-                            raise ValueError(f"{function_obj.name} expected {func_type}, but got a string instead")
+                    if arg_type in ["STRING", "CHAR[]"] and "s" not in func_type:
+                        raise ValueError(f"{function_obj.name} expected {func_type}, but got a string instead")
 
         self.visitChildren(node)
 
