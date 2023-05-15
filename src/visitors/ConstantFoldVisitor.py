@@ -3,9 +3,11 @@ from src.Util import get_type, cast_to_type
 
 
 class ConstantFoldVisitor(ASTVisitor):
-    def __init__(self, symbol_table):
+    def __init__(self, symbol_table, const_table):
         super().__init__()
         self.symbol_table = symbol_table
+        self.const_table = const_table
+
         self.operations_translation = {
             "&&": "and",
             "||": "or",

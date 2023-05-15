@@ -92,8 +92,12 @@ class SymbolTable:
     def __init__(self):
         self.current_scope: Scope = Scope("global")
         self.scopes: list[Scope] = [self.current_scope]
+        self.scope_counter = 1
 
     def add_scope(self, scope: Scope):
+        scope.name = str(self.scope_counter)
+        self.scope_counter += 1
+
         scope.parent_scope = self.current_scope
         self.scopes.append(scope)
         self.enter_scope(scope)

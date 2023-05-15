@@ -7,6 +7,7 @@ from src.antlr.CParser import CParser
 from src.ASTCreator import ASTCreator
 from src.AST import AST
 from src.ASTErrorListener import ASTErrorListener
+from src.visitors.ConstantTableVisitor import ConstantTableVisitor
 
 from src.visitors.SemanticAnalysisVisitor import SemanticAnalysisVisitor
 from src.visitors.ConstantFoldVisitor import ConstantFoldVisitor
@@ -34,8 +35,19 @@ def main(argv):
     ast_semantic_visitor = SemanticAnalysisVisitor()
     ast_semantic_visitor.visitScope(root)
 
+    # computing const table
+    const_table_visitor = ConstantTableVisitor(
+        symbol_table=ast_semantic_visitor.symbol_table
+    )
+    const_table_visitor.visitScope(root)
+
+    print(const_table_visitor.const_table)
+
     # constant fold
-    constant_fold_visitor = ConstantFoldVisitor(ast_semantic_visitor.symbol_table)
+    constant_fold_visitor = ConstantFoldVisitor(
+        symbol_table=ast_semantic_visitor.symbol_table,
+        const_table=const_table_visitor.const_table
+    )
     constant_fold_visitor.visitScope(root)
 
     root.visualize(filename="test")
