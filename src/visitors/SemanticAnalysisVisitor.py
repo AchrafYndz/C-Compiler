@@ -146,6 +146,14 @@ class SemanticAnalysisVisitor(ASTVisitor):
                         if var_obj.isArray():
                             arg_type += "[]"
                     else:
+                        # mark leaves as defined
+                        leaves = []
+                        extract_leaves(arg_node, leaves)
+                        for leaf in leaves:
+                            if isinstance(leaf, VariableNode):
+                                var_name = leaf.name
+                                self.symbol_table.alter_identifier(var_name, is_assigned=True)
+
                         continue
                     if "s" in func_type and arg_type not in ["STRING", "CHAR[]"]:
                         raise ValueError(f"{function_obj.name} expected {func_type}, but did not get a string")
