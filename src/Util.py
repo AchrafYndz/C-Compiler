@@ -1,4 +1,5 @@
 import re
+from src.Type import TypeEnum
 
 from src.ast_nodes.BranchNode import BranchNode
 from src.ast_nodes.LiteralNode import LiteralNode
@@ -76,3 +77,14 @@ def get_type(node, symbol_table):
             if var_obj.type_.value > type_:
                 type_ = var_obj.type_.value
     return type_
+
+
+def cast_to_type(type_, value):
+    if type_ == TypeEnum.FLOAT:
+        return float(value)
+    elif type_ == TypeEnum.INT:
+        return int(round(float(value)))
+    elif type_ == TypeEnum.CHAR:
+        return int(round(float(value))) % 256
+
+    return value

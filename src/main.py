@@ -9,6 +9,7 @@ from src.AST import AST
 from src.ASTErrorListener import ASTErrorListener
 
 from src.visitors.SemanticAnalysisVisitor import SemanticAnalysisVisitor
+from src.visitors.ConstantFoldVisitor import ConstantFoldVisitor
 
 
 def main(argv):
@@ -29,12 +30,15 @@ def main(argv):
     ast_creator.enterProgram(tree)
     root = ast_creator.root
 
-    root.visualize(filename="test")
-
-    ast_semantic_visitor = SemanticAnalysisVisitor()
-
     # run semantic analysis
+    ast_semantic_visitor = SemanticAnalysisVisitor()
     ast_semantic_visitor.visitScope(root)
+
+    # constant fold
+    constant_fold_visitor = ConstantFoldVisitor(ast_semantic_visitor.symbol_table)
+    constant_fold_visitor.visitScope(root)
+
+    root.visualize(filename="test")
 
     ast = AST(root)
 

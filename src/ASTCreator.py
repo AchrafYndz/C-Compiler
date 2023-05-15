@@ -47,8 +47,14 @@ class ASTCreator(CListener):
                     )
                 case "char" | "int" | "float":
                     # explicit conversion
+                    if operation == "int":
+                        type_ = TypeEnum.INT
+                    elif operation == 'float':
+                        type_ = TypeEnum.FLOAT
+                    elif operation == 'char':
+                        type_ = TypeEnum.CHAR
                     node = ExplicitConversionNode(
-                        to_type=operation
+                        to_type=type_
                     )
                 case _:
                     # "*" | "/" | "%" | "+" | "-" | "<" | "<=" | ">" | ">=" | "==" | "!=" | "&&" | "||"
