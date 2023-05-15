@@ -76,7 +76,7 @@ class Scope:
         new_ptr_level = ptr_level if ptr_level else previous_variable.ptr_level
         
         if previous_variable.isArray():
-            new_array_size = array_size if array_size else previous_variable.array_size
+            new_array_size = array_size if array_size else previous_variable.array_count
             self.table[name] = \
                 Array(name, new_type, new_is_const, new_is_assigned, new_ptr_level, new_array_size)
         elif previous_variable.isFunction():
