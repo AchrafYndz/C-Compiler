@@ -1,7 +1,10 @@
+from src.Type import TypeEnum
+
+
 class Variable:
-    def __init__(self, name="", type_="", is_const=False, is_defined=False, ptr_level=0):
+    def __init__(self, name="", type_=None, is_const=False, is_defined=False, ptr_level=0):
         self.name = name
-        self.type_ = type_
+        self.type_: TypeEnum = type_
         self.is_const = is_const
         self.is_assigned = is_defined
         self.ptr_level = ptr_level

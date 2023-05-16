@@ -41,8 +41,6 @@ def main(argv):
     )
     const_table_visitor.visitScope(root)
 
-    print(const_table_visitor.const_table)
-
     # constant fold
     constant_fold_visitor = ConstantFoldVisitor(
         symbol_table=ast_semantic_visitor.symbol_table,

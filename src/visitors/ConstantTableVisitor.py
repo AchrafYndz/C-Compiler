@@ -10,10 +10,11 @@ class ConstantTableVisitor(ASTVisitor):
         self.scope_counter: int = 1
 
     def delete_from_table(self, var_name, scope):
-        for i, entry in enumerate(self.const_table[scope]):
-            if var_name in entry:
-                del self.const_table[scope][i]
-                return
+        if scope in self.const_table:
+            for i, entry in enumerate(self.const_table[scope]):
+                if var_name in entry:
+                    del self.const_table[scope][i]
+                    return
         if scope.parent_scope:
             self.delete_from_table(var_name, scope.parent_scope)
 

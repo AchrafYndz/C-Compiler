@@ -1,5 +1,5 @@
 import re
-from src.Type import TypeEnum
+from src.Type import TypeEnum, Type
 
 from src.ast_nodes.BranchNode import BranchNode
 from src.ast_nodes.LiteralNode import LiteralNode
@@ -76,7 +76,8 @@ def get_type(node, symbol_table):
             var_obj = symbol_table.get_variable(var_name)
             if var_obj.type_.value > type_:
                 type_ = var_obj.type_.value
-    return type_
+    enum_type = TypeEnum(type_)
+    return enum_type
 
 
 def cast_to_type(type_, value):

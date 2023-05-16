@@ -4,6 +4,8 @@ from src.Util import auto_cast, returns_something, has_duplicates, look_in_paren
     extract_scan_types, extract_leaves, get_type
 from src.Type import TypeEnum
 
+# TODO: No modifying const variable
+
 
 class SemanticAnalysisVisitor(ASTVisitor):
     def __init__(self):
@@ -352,7 +354,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
                 #         if var_obj.type_.value > right_type:
                 #             right_type = var_obj.type_.value
 
-                if left_type < right_type:
+                if left_type < right_type.value:
                     print(f"Implicit conversion from {TypeEnum(right_type).name} to {TypeEnum(left_type).name}")
 
         self.symbol_table.add_variable(variable_obj)
