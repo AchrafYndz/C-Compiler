@@ -8,6 +8,7 @@ from src.ASTCreator import ASTCreator
 from src.AST import AST
 from src.ASTErrorListener import ASTErrorListener
 from src.visitors.ConstantTableVisitor import ConstantTableVisitor
+from src.visitors.MIPSConversionVisitor import MIPSConversionVisitor
 
 from src.visitors.SemanticAnalysisVisitor import SemanticAnalysisVisitor
 from src.visitors.ConstantFoldVisitor import ConstantFoldVisitor
@@ -49,6 +50,11 @@ def main(argv):
     constant_fold_visitor.visitScope(root)
 
     root.visualize(filename="test")
+
+    # run semantic analysis
+    mips_conversion_visitor = MIPSConversionVisitor()
+    mips_conversion_visitor.visitScope(root)
+    print(mips_conversion_visitor.content)
 
     ast = AST(root)
 
