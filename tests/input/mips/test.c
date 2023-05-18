@@ -1,6 +1,8 @@
 #include <stdio.h>
 
-int x = 3;
+int i = 3;
+char c = 'a';
+float f = 3.0;
 
 int main() {
 int y = 4;

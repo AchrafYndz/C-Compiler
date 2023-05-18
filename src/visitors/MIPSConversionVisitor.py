@@ -42,6 +42,10 @@ class MIPSConversionVisitor(ASTVisitor):
         # start
         variable_node = node.children[1]
 
+        if variable_node.name == "main":
+            self.mips_interface.jump_and_link("main")
+            self.mips_interface.exit()
+
         self.mips_interface.enter_function(variable_node.name)
 
         # self.mips_interface.append_instruction("addiu $sp, $sp, -16")
@@ -90,9 +94,11 @@ class MIPSConversionVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitVariable_definition(self, node: VariableDefinitionNode):
+        # global variable
         if self.symbol_table.current_scope.name == "1":
             value_node: LiteralNode = node.children[0]
-            self.mips_interface.append_global_variable(node.name, value_node.value)
+            self.mips_interface.append_global_variable(node.name, value_node.value, node.type)
+
         self.visitChildren(node)
 
     def visitVariable(self, node: VariableNode):

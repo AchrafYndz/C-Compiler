@@ -1,4 +1,5 @@
 import re
+import struct
 from src.Type import TypeEnum, Type
 
 from src.ast_nodes.BranchNode import BranchNode
@@ -89,3 +90,8 @@ def cast_to_type(type_, value):
         return int(round(float(value))) % 256
 
     return value
+
+
+# https://stackoverflow.com/questions/23624212/how-to-convert-a-float-into-hex
+def float_to_hex(f):
+    return hex(struct.unpack('<I', struct.pack('<f', f))[0])
