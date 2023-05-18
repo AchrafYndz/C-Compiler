@@ -1,4 +1,5 @@
 import sys
+import subprocess
 from antlr4 import *
 
 from src.antlr.CLexer import CLexer
@@ -51,10 +52,18 @@ def main(argv):
 
     root.visualize(filename="test")
 
-    # run semantic analysis
-    mips_conversion_visitor = MIPSConversionVisitor()
+    # generate mips code
+    mips_conversion_visitor = MIPSConversionVisitor(
+        symbol_table=ast_semantic_visitor.symbol_table,
+    )
     mips_conversion_visitor.visitScope(root)
-    print(mips_conversion_visitor.content)
+
+    mips_conversion_visitor.mips_interface.write_to_file("tests/output/mips/test.asm")
+    print("----------------------------------------")
+    print("Running Mips...")
+    print("----------------------------------------")
+
+    subprocess.call(["java", "-jar", "bin/Mars4_5.jar", "tests/output/mips/test.asm"])
 
     ast = AST(root)
 

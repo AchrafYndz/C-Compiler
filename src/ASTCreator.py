@@ -265,7 +265,7 @@ class ASTCreator(CListener):
     def enterPrint(self, ctx: CParser.PrintContext):
         node = FunctionCallNode("printf")
         if ctx.STRING():
-            node.addChild(LiteralNode(ctx.STRING().getText(), Type(TypeEnum.STRING)))
+            node.addChild(LiteralNode(ctx.STRING().getText(), TypeEnum.STRING))
         self.current_node.addChild(node)
         self.current_node = node
 
@@ -275,7 +275,7 @@ class ASTCreator(CListener):
     def enterScan(self, ctx: CParser.ScanContext):
         node = FunctionCallNode("scanf")
         if ctx.STRING():
-            node.addChild(LiteralNode(ctx.STRING().getText(), Type(TypeEnum.STRING)))
+            node.addChild(LiteralNode(ctx.STRING().getText(), TypeEnum.STRING))
         self.current_node.addChild(node)
         self.current_node = node
 
