@@ -37,9 +37,35 @@ class MIPSConversionTextVisitor(ASTVisitor):
 
     def visitFunction_call(self, node: FunctionCallNode):
         if node.name == "printf":
-            to_print = node.children[0].value.replace('"', "")
-            label = self.mips_interface.data[to_print]
-            self.mips_interface.print(label)
+            if len(node.children) == 1:
+                # must be a string
+                to_print_node = node.children[0]
+                to_print = to_print_node.value.replace('"', "")
+                label = self.mips_interface.data[to_print]
+                self.mips_interface.print(label, to_print_node.type)
+            else:
+                # can be either a variable or a literal
+                to_print_nodes = node.children[1:]
+                for to_print_node in to_print_nodes:
+                    is_variable = False
+                    to_print = None
+                    is_string = False
+                    type_ = None
+
+                    if isinstance(to_print_node, LiteralNode):
+                        is_string = (to_print_node.type == TypeEnum.STRING)
+                        to_print = to_print_node.value.replace('"', "")
+                        type_ = to_print_node.type
+                    elif isinstance(to_print_node, VariableNode):
+                        self.mips_interface.load_variable("t0", to_print_node.name)
+                        var_obj = self.symbol_table.get_variable(to_print_node.name)
+                        type_ = var_obj.type_
+                        is_variable = True
+                    if is_string:
+                        label = self.mips_interface.data[to_print]
+                        self.mips_interface.print(label, type_)
+                    else:
+                        self.mips_interface.print(to_print, type_, is_variable)
         self.visitChildren(node)
 
     def visitFunction(self, node: FunctionNode):

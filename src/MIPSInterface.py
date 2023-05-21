@@ -103,8 +103,25 @@ class MIPSInterface:
     def store_word_c1(self, register1, offset, register2):
         self.append_instruction(f"swc1 ${register1}, {offset}(${register2})")
 
-    def print(self, label, type_=None):
-        self.load_address("a0", label)
-        self.load_immediate("v0", 4)
+    # def print_string(self, label):
+    #     self.load_address("a0", label)
+    #     self.load_immediate("v0", 4)
+    #     self.syscall()
+
+    def print(self, value, type_: TypeEnum=None, is_variable=False):
+        v0_arguments = {
+            TypeEnum.INT: 1,
+            TypeEnum.FLOAT: 2,
+            TypeEnum.STRING: 4,
+            TypeEnum.CHAR: 11
+        }
+        v0_argument = v0_arguments[type_]
+        if is_variable:
+            self.move("a0", "t0")
+        elif v0_argument == 4:
+            self.load_address("a0", value)
+        else:
+            self.load_immediate("a0", value)
+        self.load_immediate("v0", v0_argument)  # TODO: for now only ints
         self.syscall()
 
