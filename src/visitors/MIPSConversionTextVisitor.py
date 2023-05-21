@@ -100,10 +100,12 @@ class MIPSConversionTextVisitor(ASTVisitor):
             self.mips_interface.store_word(register1=register, offset=store_offset - (4 * index), register2="sp")
 
         self.mips_interface.move("fp", "sp")
+        self.mips_interface.subtract_unsigned("sp", "sp", (len(store_registers)+1) * 4)
 
         # function body code
         self.visitChildren(node)
 
+        self.mips_interface.add_immediate_unsigned("sp", "sp", (len(store_registers)+1) * 4)
         self.mips_interface.move("sp", "fp")
 
         for index, register in enumerate(reversed(store_registers)):

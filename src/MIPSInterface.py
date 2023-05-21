@@ -25,6 +25,12 @@ class MIPSInterface:
     def load_immediate(self, register, value):
         self.append_instruction(f"li ${register}, {value}")
 
+    def subtract_unsigned(self, register1, register2, value):
+        self.append_instruction(f"subu ${register1}, ${register2}, {value}")
+
+    def add_immediate_unsigned(self, register1, register2, value):
+        self.append_instruction(f"addiu ${register1}, ${register2}, {value}")
+
     def append_string(self, string: str):
         string = string.replace('"', '')
         label = string.replace(' ', '_') + "_" + str(len(self.data))
@@ -106,11 +112,6 @@ class MIPSInterface:
 
     def store_word_c1(self, register1, offset, register2):
         self.append_instruction(f"swc1 ${register1}, {offset}(${register2})")
-
-    # def print_string(self, label):
-    #     self.load_address("a0", label)
-    #     self.load_immediate("v0", 4)
-    #     self.syscall()
 
     def print(self, value, type_: TypeEnum=None, is_variable=False):
         v0_arguments = {
