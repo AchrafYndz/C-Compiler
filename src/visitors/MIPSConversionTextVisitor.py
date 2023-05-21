@@ -15,6 +15,13 @@ class MIPSConversionTextVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitAssignment(self, node: AssignmentNode):
+        if len(node.children) == 1:
+            if isinstance(node.children[0], LiteralNode):
+                self.mips_interface.load_immediate("t0", node.children[0].value)
+            elif isinstance(node.children[0], VariableNode):
+                self.mips_interface.load_variable("t0", node.children[0].name)
+        self.mips_interface.store_in_variable(node.name)
+
         self.visitChildren(node)
 
     def visitBinary_expression(self, node: BinaryExpressionNode):
