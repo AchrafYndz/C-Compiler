@@ -106,10 +106,18 @@ class MIPSConversionTextVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitVariable_definition(self, node: VariableDefinitionNode):
-        # global variable
         if self.symbol_table.current_scope.name == "1":
+            # global variable
             value_node: LiteralNode = node.children[0]
             self.mips_interface.append_global_variable(node.name, value_node.value, node.type)
+        else:
+            # local variable
+            if len(node.children) == 1:
+                if isinstance(node.children[0], LiteralNode):
+                    self.mips_interface.load_immediate("t0", node.children[0].value)
+                elif isinstance(node.children[0], VariableNode):
+                    self.mips_interface.load_variable("t0", node.children[0].name)
+            self.mips_interface.append_variable(node.name)
 
         self.visitChildren(node)
 

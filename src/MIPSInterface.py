@@ -11,7 +11,9 @@ class MIPSInterface:
         self.exit()
 
         self.global_variables = {}
+        self.local_variables = {}  # var_name: int
         self.current_offset = 0
+        self.local_offset = 0
 
     def exit(self):
         self.load_immediate("v0", 10)
@@ -45,6 +47,15 @@ class MIPSInterface:
         else:
             self.store_word("s0", self.current_offset, "gp")
         self.current_offset -= 4
+
+    def append_variable(self, var_name):
+        self.store_word("t0", self.local_offset, "sp")
+        self.local_variables[var_name] = self.local_offset
+        self.local_offset += 4
+
+    def load_variable(self, register, var_name):
+        offset = self.local_variables[var_name]
+        self.load_word(register, offset, "sp")
 
     def store_word(self, register1, offset, register2):
         self.append_instruction(f"sw ${register1}, {offset}(${register2})")
