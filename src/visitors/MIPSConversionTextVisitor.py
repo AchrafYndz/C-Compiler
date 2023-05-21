@@ -73,6 +73,8 @@ class MIPSConversionTextVisitor(ASTVisitor):
                         self.mips_interface.print(label, type_)
                     else:
                         self.mips_interface.print(to_print, type_, is_variable)
+        else:
+            self.mips_interface.jump_and_link(node.name)
         self.visitChildren(node)
 
     def visitFunction(self, node: FunctionNode):
