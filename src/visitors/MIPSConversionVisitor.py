@@ -39,34 +39,44 @@ class MIPSConversionVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitFunction(self, node: FunctionNode):
+        '''
+        REGISTERS = {
+            't': 10,
+            's': 8,
+            'a': 4,
+            'v': 2,
+            'f': 31
+        }'''
+
         # start
         variable_node = node.children[1]
 
-        if variable_node.name == "main":
-            self.mips_interface.jump_and_link("main")
-            self.mips_interface.exit()
-
         self.mips_interface.enter_function(variable_node.name)
 
-        # self.mips_interface.append_instruction("addiu $sp, $sp, -16")
-        # self.mips_interface.append_instruction("sw $ra, 12($sp)")
-        # self.mips_interface.append_instruction("sw $fp, 8($sp)")
-        # self.mips_interface.append_instruction("move $fp, $sp")
-        # self.mips_interface.append_instruction("sw $zero, 4($fp)")
+        args_nodes = [child for child in node.children if isinstance(child, FunctionArgumentNode)]
+        args_nodes_count = len(args_nodes)
 
-        # function body here
-        # self.mips_interface.append_instruction("addiu $2, $zero, 0")  # saving of return value
+        store_registers = ["fp", "ra", "s0", "s1", "s2", "s3", "s4", "s5", "s6", "s7"]
+        store_offset = args_nodes_count * -4
+
+        for index, register in enumerate(store_registers):
+            self.mips_interface.store_word(register1=register, offset=store_offset - (4 * index), register2="sp")
+
+        self.mips_interface.move("fp", "sp")
+
+        # function body code
         self.visitChildren(node)
 
-        # end
+        self.mips_interface.move("sp", "fp")
+
+        for index, register in enumerate(reversed(store_registers)):
+            self.mips_interface.load_word(
+                register1=register,
+                offset=store_offset - ((len(store_registers) - 1)*4 - (4 * index)),
+                register2="sp"
+            )
+
         self.mips_interface.leave_function()
-        # self.mips_interface.append_instruction("move $sp, $fp")
-        # self.mips_interface.append_instruction("lw $fp, 8($sp)")
-        # self.mips_interface.append_instruction("lw $ra, 12($sp)")
-        # self.mips_interface.append_instruction("addiu $sp, $sp, 16")
-        #
-        # self.mips_interface.append_instruction("jr $ra")
-        # self.mips_interface.append_instruction("nop")
 
     def visitInclude(self, node: IncludeNode):
         self.visitChildren(node)

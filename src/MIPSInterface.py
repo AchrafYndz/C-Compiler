@@ -7,6 +7,8 @@ class MIPSInterface:
         self.data = []
         self.text = []
         self.move("fp", "sp")
+        self.jump_and_link("main")
+        self.exit()
 
         self.global_variables = {}
         self.current_offset = 0
@@ -46,6 +48,9 @@ class MIPSInterface:
 
     def store_word(self, register1, offset, register2):
         self.append_instruction(f"sw ${register1}, {offset}(${register2})")
+
+    def load_word(self, register1, offset, register2):
+        self.append_instruction(f"lw ${register1}, {offset}(${register2})")
 
     def jump(self, label_name: str):
         self.append_instruction(f"j {label_name}")
