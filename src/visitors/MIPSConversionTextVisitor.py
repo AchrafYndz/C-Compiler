@@ -4,12 +4,12 @@ from src.visitors.ASTVisitor import ASTVisitor
 from src.MIPSInterface import MIPSInterface
 
 
-class MIPSConversionVisitor(ASTVisitor):
-    def __init__(self, symbol_table: SymbolTable):
+class MIPSConversionTextVisitor(ASTVisitor):
+    def __init__(self, symbol_table: SymbolTable, mips_interface):
         super().__init__()
         self.symbol_table = symbol_table
         self.scope_counter: int = 1
-        self.mips_interface = MIPSInterface()
+        self.mips_interface = mips_interface
 
     def visitArray_assignment(self, node: ArrayAssignmentNode):
         self.visitChildren(node)
@@ -36,6 +36,10 @@ class MIPSConversionVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitFunction_call(self, node: FunctionCallNode):
+        if node.name == "printf":
+            to_print = node.children[0].value.replace('"', "")
+            label = self.mips_interface.data[to_print]
+            self.mips_interface.print(label)
         self.visitChildren(node)
 
     def visitFunction(self, node: FunctionNode):
@@ -82,8 +86,6 @@ class MIPSConversionVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitLiteral(self, node: LiteralNode):
-        if node.type == TypeEnum.STRING:
-            self.mips_interface.append_string(node.value)
         self.visitChildren(node)
 
     def visitLoop(self, node: LoopNode):

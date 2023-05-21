@@ -2,19 +2,20 @@ import sys
 import subprocess
 from antlr4 import *
 
+from src.MIPSConverter import MIPSConverter
 from src.antlr.CLexer import CLexer
 from src.antlr.CParser import CParser
 
 from src.ASTCreator import ASTCreator
 from src.AST import AST
 from src.ASTErrorListener import ASTErrorListener
-from src.visitors.MIPSConversionVisitor import MIPSConversionVisitor
+from src.visitors.MIPSConversionTextVisitor import MIPSConversionTextVisitor
 
 from src.visitors.SemanticAnalysisVisitor import SemanticAnalysisVisitor
 from src.visitors.ConstantFoldVisitor import ConstantFoldVisitor
 
 
-RUN_MIPS = False
+RUN_MIPS = True
 
 
 def main(argv):
@@ -44,17 +45,15 @@ def main(argv):
         symbol_table=ast_semantic_visitor.symbol_table
     )
     constant_fold_visitor.visitScope(ast.root)
-    print(constant_fold_visitor.const_table)
 
     ast.visualize(filename="test")
 
     # generate mips code
     if RUN_MIPS:
-        mips_conversion_visitor = MIPSConversionVisitor(
+        mips_converter = MIPSConverter(
             symbol_table=ast_semantic_visitor.symbol_table,
         )
-        mips_conversion_visitor.visitScope(ast.root)
-        mips_conversion_visitor.mips_interface.write_to_file("tests/output/mips/test.asm")
+        mips_converter.convert(ast.root)
 
         print("----------------------------------------")
         print("Running Mips...")

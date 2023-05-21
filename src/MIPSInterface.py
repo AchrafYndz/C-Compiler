@@ -4,7 +4,7 @@ from src.Util import float_to_hex
 
 class MIPSInterface:
     def __init__(self):
-        self.data = []
+        self.data = {}
         self.text = []
         self.move("fp", "sp")
         self.jump_and_link("main")
@@ -26,7 +26,7 @@ class MIPSInterface:
     def append_string(self, string: str):
         string = string.replace('"', '')
         label = string.replace(' ', '_') + "_" + str(len(self.data))
-        self.data.append(f"{label}: .asciiz \"{string}\"")
+        self.data[string] = label
 
     def append_instruction(self, instr: str):
         self.text.append(instr)
@@ -52,6 +52,9 @@ class MIPSInterface:
     def load_word(self, register1, offset, register2):
         self.append_instruction(f"lw ${register1}, {offset}(${register2})")
 
+    def load_address(self, register1, label):
+        self.append_instruction(f"la ${register1}, {label}")
+
     def jump(self, label_name: str):
         self.append_instruction(f"j {label_name}")
 
@@ -74,8 +77,8 @@ class MIPSInterface:
     def write_to_file(self, filename):
         file = open(filename, "w")
         file.write(".data\n")
-        for line in self.data:
-            file.write(line + '\n')
+        for string, label in self.data.items():
+            file.write(label + ": .asciiz \"" + string + '\" \n')
         file.write('\n')
 
         file.write(".text\n")
@@ -88,3 +91,9 @@ class MIPSInterface:
 
     def store_word_c1(self, register1, offset, register2):
         self.append_instruction(f"swc1 ${register1}, {offset}(${register2})")
+
+    def print(self, label, type_=None):
+        self.load_address("a0", label)
+        self.load_immediate("v0", 4)
+        self.syscall()
+
