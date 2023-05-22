@@ -4,8 +4,6 @@ from src.Util import auto_cast, returns_something, has_duplicates, look_in_paren
     extract_scan_types, extract_leaves, get_type
 from src.Type import TypeEnum
 
-# TODO: No modifying const variable
-
 
 class SemanticAnalysisVisitor(ASTVisitor):
     def __init__(self):
@@ -21,6 +19,12 @@ class SemanticAnalysisVisitor(ASTVisitor):
                 if not var_obj.is_assigned:
                     raise ValueError(f"Undefined variable {var_name} cannot be used in {expression_type}")
 
+    def check_not_const(self, node):
+        var_name = node.name
+        var_obj = self.symbol_table.get_variable(var_name)
+        if var_obj.is_const:
+            raise ValueError(f"Const variable `{var_name}` cannot be modified")
+
     def visitArray_assignment(self, node: ArrayAssignmentNode):
         if not isinstance(node.index, int):
             raise ValueError("The index of an array must be an integer.")
@@ -32,6 +36,8 @@ class SemanticAnalysisVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitAssignment(self, node: AssignmentNode):
+        self.check_not_const(node)
+
         assignee = node.children[0]
         self.check_is_defined([assignee], "assignment")
         if isinstance(assignee, FunctionCallNode):
@@ -302,6 +308,8 @@ class SemanticAnalysisVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitUnary_expression(self, node: UnaryExpressionNode):
+        if node.operator in ["++", "--"]:
+            self.check_not_const(node.children[0])
         operand_node = node.children[0]
         self.check_is_defined([operand_node], "unary expression")
         if node.operator in ["&", "++", "--"]:

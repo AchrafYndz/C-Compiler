@@ -1,12 +1,9 @@
 #include <stdio.h>
 
-int i = 3;
-char c = 'a';
-float f = 3.0;
-
 int main() {
-int y = 4;
+    const int a = 3;
+    int y = 2 + a;
+    printf("%i", y);
     printf("hello world");
-    scanf("%s", "goodbye world");
     return 0;
 }
