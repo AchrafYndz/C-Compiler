@@ -31,6 +31,9 @@ class MIPSInterface:
     def add_immediate_unsigned(self, register1, register2, value):
         self.append_instruction(f"addiu ${register1}, ${register2}, {value}")
 
+    def add_unsigned(self, register1, register2, register3):
+        self.append_instruction(f"addu ${register1}, ${register2}, ${register3}")
+
     def append_string(self, string: str):
         string = string.replace('"', '')
         label = string.replace(' ', '_') + "_" + str(len(self.data))

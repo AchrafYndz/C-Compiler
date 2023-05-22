@@ -1,5 +1,7 @@
+from src.Type import TypeEnum
+
 INSTRUCTIONS = {
-    "int": {
+    TypeEnum.INT: {
         '+': 'add',
         '-': 'sub',
         '*': 'mul',
@@ -14,7 +16,7 @@ INSTRUCTIONS = {
         '&&': 'and',
         '||': 'or'
     },
-    "float": {
+    TypeEnum.FLOAT: {
         '+': 'add.s',
         '-': 'sub.s',
         '*': 'mul.s',

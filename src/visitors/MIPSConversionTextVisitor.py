@@ -1,7 +1,8 @@
+from src.MIPSUtil import INSTRUCTIONS
 from src.SymbolTable import SymbolTable
+from src.Util import get_type
 from src.ast_nodes import *
 from src.visitors.ASTVisitor import ASTVisitor
-from src.MIPSInterface import MIPSInterface
 
 
 class MIPSConversionTextVisitor(ASTVisitor):
@@ -26,6 +27,26 @@ class MIPSConversionTextVisitor(ASTVisitor):
 
     def visitBinary_expression(self, node: BinaryExpressionNode):
         self.visitChildren(node)
+
+        type_ = get_type(node, self.symbol_table)
+        type_ = TypeEnum.INT if type_ == TypeEnum.CHAR else type_
+
+        mips_instruction = INSTRUCTIONS[type_][node.operator]
+        operators = []
+        immediate = None
+        for i, child_node in enumerate(node.children):
+            if isinstance(child_node, VariableNode):
+                self.mips_interface.load_variable(f"t{i}", child_node.name)
+                operators.append(f"t{i}")
+            elif isinstance(child_node, LiteralNode):
+                operators.append(child_node.value)
+                immediate = i
+            else:
+                operators.append("t0")
+        if immediate is not None:
+            self.mips_interface.add_immediate_unsigned("t0", operators[int(not immediate)], operators[immediate])
+        else:
+            self.mips_interface.add_unsigned("t0", operators[0], operators[1])
 
     def visitBranch(self, node: BranchNode):
         self.visitChildren(node)
@@ -143,6 +164,8 @@ class MIPSConversionTextVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitVariable_definition(self, node: VariableDefinitionNode):
+        self.visitChildren(node)
+
         if self.symbol_table.current_scope.name == "1":
             # global variable
             value_node: LiteralNode = node.children[0]
@@ -156,7 +179,6 @@ class MIPSConversionTextVisitor(ASTVisitor):
                     self.mips_interface.load_variable("t0", node.children[0].name)
             self.mips_interface.append_variable(node.name)
 
-        self.visitChildren(node)
 
     def visitVariable(self, node: VariableNode):
         self.visitChildren(node)
