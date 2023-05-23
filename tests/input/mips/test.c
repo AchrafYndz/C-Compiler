@@ -2,8 +2,8 @@
 
 int main() {
     char b = 'b';
-    b = 'b';
-    int c =  3 < (b - 1);
+    b = 'd';
+    int c =  (b + (b * 3)) / b;
     printf("%i", c);
     return 0;
 }

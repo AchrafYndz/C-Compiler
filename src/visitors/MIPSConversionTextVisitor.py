@@ -33,33 +33,21 @@ class MIPSConversionTextVisitor(ASTVisitor):
 
         mips_instruction = INSTRUCTIONS[node.operator]
         operators = []
-        immediate = None
         for i, child_node in enumerate(node.children):
             if isinstance(child_node, VariableNode):
                 self.mips_interface.load_variable(f"t{i}", child_node.name)
                 operators.append(f"t{i}")
             elif isinstance(child_node, LiteralNode):
-                operators.append(child_node.value)
-                immediate = i
+                self.mips_interface.load_immediate(f"t{i}", child_node.value)
+                operators.append(f"t{i}")
             else:
                 operators.append("t0")
-        if immediate is not None:
-            print(operators)
-            print(immediate)
-            mips_instruction(
-                self.mips_interface,
-                "t0",
-                operators[int(not immediate)],
-                operators[immediate],
-                immediate=immediate
-            )
-        else:
-            mips_instruction(
-                self.mips_interface,
-                "t0",
-                operators[0],
-                operators[1]
-            )
+        mips_instruction(
+            self.mips_interface,
+            "t0",
+            operators[0],
+            operators[1]
+        )
 
     def visitBranch(self, node: BranchNode):
         self.visitChildren(node)
@@ -136,12 +124,12 @@ class MIPSConversionTextVisitor(ASTVisitor):
             self.mips_interface.store_word(register1=register, offset=store_offset - (4 * index), register2="sp")
 
         self.mips_interface.move("fp", "sp")
-        self.mips_interface.subtract_unsigned("sp", "sp", (len(store_registers)+1) * 4, immediate=True)
+        self.mips_interface.subtract_immediate_unsigned("sp", "sp", (len(store_registers)+1) * 4)
 
         # function body code
         self.visitChildren(node)
 
-        self.mips_interface.add_unsigned("sp", "sp", (len(store_registers)+1) * 4, immediate=True)
+        self.mips_interface.add_immediate_unsigned("sp", "sp", (len(store_registers)+1) * 4)
         self.mips_interface.move("sp", "fp")
 
         for index, register in enumerate(reversed(store_registers)):

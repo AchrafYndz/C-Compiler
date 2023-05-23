@@ -30,44 +30,41 @@ class MIPSInterface:
     def load_immediate(self, register, value):
         self.append_instruction(f"li ${register}, {value}")
 
-    def subtract_unsigned(self, register, argument1, argument2, immediate=-1, is_float=False):
-        operation = "subiu" if immediate != -1 else "subu"
-        operation = operation if not is_float else "sub.s"
-        if immediate == 0:
-            argument1, argument2 = self._swap_immediate_values(argument2, argument1)
-            operation = "subu"
-        self.append_instruction(f"{operation} ${register}, ${argument1}, {'' if immediate == 1 else '$'}{argument2}")
+    def add_immediate_unsigned(self, register, argument1, argument2):
+        self.append_instruction(f"addiu ${register}, ${argument1}, {argument2}")
 
-    def add_unsigned(self, register, argument1, argument2, immediate=-1, is_float=False):
-        operation = "addiu" if immediate != -1 else "addu"
-        operation = operation if not is_float else "add.s"
-        self.append_instruction(f"{operation} ${register}, ${argument1}, {'' if immediate != -1 else '$'}{argument2}")
+    def subtract_immediate_unsigned(self, register, argument1, argument2):
+        self.append_instruction(f"subiu ${register}, ${argument1}, {argument2}")
 
-    def multiply(self, register, argument1, argument2, immediate=-1, is_float=False):
+    def subtract_unsigned(self, register, argument1, argument2, is_float=False):
+        operation = "subu" if not is_float else "sub.s"
+        self.append_instruction(f"{operation} ${register}, ${argument1}, ${argument2}")
+
+    def add_unsigned(self, register, argument1, argument2, is_float=False):
+        operation = "addu" if not is_float else "add.s"
+        self.append_instruction(f"{operation} ${register}, ${argument1}, ${argument2}")
+
+    def multiply(self, register, argument1, argument2, is_float=False):
         operation = "mul" if not is_float else "mul.s"
-        self.append_instruction(f"{operation} ${register}, ${argument1}, {'' if immediate != -1 else '$'}{argument2}")
+        self.append_instruction(f"{operation} ${register}, ${argument1}, ${argument2}")
 
-    def divide(self, register, argument1, argument2, immediate=-1, is_float=False):
+    def divide(self, register, argument1, argument2, is_float=False):
         operation = "div" if not is_float else "div.s"
-        if immediate == 0:
-            argument1, argument2 = self._swap_immediate_values(argument2, argument1)
-        self.append_instruction(f"{operation} ${register}, ${argument1}, {'' if immediate == 1 else '$'}{argument2}")
+        self.append_instruction(f"{operation} ${register}, ${argument1}, ${argument2}")
 
-    def modulo(self, register, argument1, argument2, immediate=-1, is_float=False):
+    def modulo(self, register, argument1, argument2, is_float=False):
         assert (not is_float)
-        if immediate == 0:
-            argument1, argument2 = self._swap_immediate_values(argument2, argument1)
-        self.append_instruction(f"rem ${register}, ${argument1}, {'' if immediate == 1 else '$'}{argument2}")
+        self.append_instruction(f"rem ${register}, ${argument1}, ${argument2}")
 
-    def strictly_less(self, register, argument1, argument2, immediate=-1, is_float=False):
-        operation = "slti" if immediate == 1 else "slt"
-        if immediate == 0:
-            argument1, argument2 = self._swap_immediate_values(argument2, argument1)
-            operation = "slt"
-        self.append_instruction(f"{operation} ${register}, ${argument1}, {'' if immediate == 1 else '$'}{argument2}")
+    def strictly_less(self, register, argument1, argument2, is_float=False):
+        self.append_instruction(f"slt ${register}, ${argument1}, ${argument2}")
 
-    def greater_or_equal(self, register, argument1, argument2, immediate, is_float):
-        pass
+    # def strictly_greater(self, register, argument1, argument2, immediate=-1, is_float=False):
+    #     operation = "sgti" if immediate == 1 else "sgt"
+    #     if immediate == 0:
+    #         argument1, argument2 = self._swap_immediate_values(argument2, argument1)
+    #         operation = "sgt"
+    #     self.append_instruction(f"{operation} ${register}, ${argument1}, {'' if immediate == 1 else '$'}{argument2}")
 
     def append_string(self, string: str):
         string = string.replace('"', '')
