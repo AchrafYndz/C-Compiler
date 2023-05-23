@@ -59,12 +59,26 @@ class MIPSInterface:
     def strictly_less(self, register, argument1, argument2, is_float=False):
         self.append_instruction(f"slt ${register}, ${argument1}, ${argument2}")
 
-    # def strictly_greater(self, register, argument1, argument2, immediate=-1, is_float=False):
-    #     operation = "sgti" if immediate == 1 else "sgt"
-    #     if immediate == 0:
-    #         argument1, argument2 = self._swap_immediate_values(argument2, argument1)
-    #         operation = "sgt"
-    #     self.append_instruction(f"{operation} ${register}, ${argument1}, {'' if immediate == 1 else '$'}{argument2}")
+    def strictly_greater(self, register, argument1, argument2, is_float=False):
+        self.append_instruction(f"sgt ${register}, ${argument1}, ${argument2}")
+
+    def less_or_equal(self, register, argument1, argument2, is_float=False):
+        self.append_instruction(f"sle ${register}, ${argument1}, ${argument2}")
+
+    def greater_or_equal(self, register, argument1, argument2, is_float=False):
+        self.append_instruction(f"sge ${register}, ${argument1}, ${argument2}")
+
+    def equal(self, register, argument1, argument2, is_float=False):
+        self.append_instruction(f"seq ${register}, ${argument1}, ${argument2}")
+
+    def not_equal(self, register, argument1, argument2, is_float=False):
+        self.append_instruction(f"sne ${register}, ${argument1}, ${argument2}")
+
+    def logical_and(self, register, argument1, argument2, is_float=False):
+        self.append_instruction(f"and ${register}, ${argument1}, ${argument2}")
+
+    def logical_or(self, register, argument1, argument2, is_float=False):
+        self.append_instruction(f"or ${register}, ${argument1}, ${argument2}")
 
     def append_string(self, string: str):
         string = string.replace('"', '')
