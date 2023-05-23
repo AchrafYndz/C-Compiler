@@ -125,7 +125,7 @@ class MIPSInterface:
 
     def store_in_variable(self, var_name, register="t0"):
         offset = self.local_variables[var_name]
-        self.store_word("t0", offset, "sp")
+        self.store_word(register, offset, "sp")
 
     def load_variable(self, register, var_name):
         offset = self.local_variables[var_name]
