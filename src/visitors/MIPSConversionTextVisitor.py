@@ -35,19 +35,29 @@ class MIPSConversionTextVisitor(ASTVisitor):
         operators = []
         for i, child_node in enumerate(node.children):
             if isinstance(child_node, VariableNode):
-                self.mips_interface.load_variable(f"t{i}", child_node.name)
-                operators.append(f"t{i}")
+                free_register = self.mips_interface.get_free_register()
+                self.mips_interface.load_variable(free_register, child_node.name)
+                operators.append(free_register)
             elif isinstance(child_node, LiteralNode):
-                self.mips_interface.load_immediate(f"t{i}", child_node.value)
-                operators.append(f"t{i}")
+                free_register = self.mips_interface.get_free_register()
+                self.mips_interface.load_immediate(free_register, child_node.value)
+                operators.append(free_register)
             else:
-                operators.append("t0")
+                expression_register = self.mips_interface.last_expression_registers.pop(0)
+                operators.append(expression_register)
+
+        result_register = self.mips_interface.get_free_register()
+        self.mips_interface.last_expression_registers.append(result_register)
+
         mips_instruction(
             self.mips_interface,
-            "t0",
+            result_register,
             operators[0],
             operators[1]
         )
+        self.mips_interface.free_up_registers(operators)
+
+        print(self.mips_interface.last_expression_registers)
 
     def visitBranch(self, node: BranchNode):
         self.visitChildren(node)
@@ -172,14 +182,18 @@ class MIPSConversionTextVisitor(ASTVisitor):
             value_node: LiteralNode = node.children[0]
             self.mips_interface.append_global_variable(node.name, value_node.value, node.type)
         else:
+            register = None
             # local variable
-            if len(node.children) == 1:
-                if isinstance(node.children[0], LiteralNode):
-                    self.mips_interface.load_immediate("t0", node.children[0].value)
-                elif isinstance(node.children[0], VariableNode):
-                    self.mips_interface.load_variable("t0", node.children[0].name)
-            self.mips_interface.append_variable(node.name)
-
+            if isinstance(node.children[0], LiteralNode):
+                register = self.mips_interface.get_free_register()
+                self.mips_interface.load_immediate(register, node.children[0].value)
+            elif isinstance(node.children[0], VariableNode):
+                register = self.mips_interface.get_free_register()
+                self.mips_interface.load_variable(register, node.children[0].name)
+            else:
+                register = self.mips_interface.last_expression_registers.pop(0)
+            self.mips_interface.append_variable(register, node.name)
+            self.mips_interface.free_up_registers([register])
 
     def visitVariable(self, node: VariableNode):
         self.visitChildren(node)

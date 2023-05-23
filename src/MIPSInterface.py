@@ -15,6 +15,17 @@ class MIPSInterface:
         self.current_offset = 0
         self.local_offset = 0
 
+        self.free_registers = [f"t{i}" for i in range(8)]
+        self.last_expression_registers = []
+
+    def get_free_register(self):
+        return self.free_registers.pop(0)
+
+    def free_up_registers(self, registers):
+        if any([register in self.free_registers for register in registers]):
+            raise ValueError("Trying to free a register that should already be free")
+        self.free_registers += registers
+
     def _swap_immediate_values(self, immediate_value, argument):
         # load the immediate value into a register
         self.load_immediate("t0", immediate_value)
