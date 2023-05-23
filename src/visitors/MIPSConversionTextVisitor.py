@@ -174,11 +174,10 @@ class MIPSConversionTextVisitor(ASTVisitor):
     def visitUnary_expression(self, node: UnaryExpressionNode):
         # ++, --, &, *, !
         child_node = node.children[0]
-        if node.operator == "!":
-            if isinstance(child_node, LiteralNode):
-                register = self.mips_interface.get_free_register()
-                self.mips_interface.load_immediate(register, child_node.value)
-            elif isinstance(child_node, VariableNode): 
+        if node.operator in ["!", "++", "--"]:
+            mips_instruction = INSTRUCTIONS[node.operator]
+
+            if isinstance(child_node, VariableNode):
                 register = self.mips_interface.get_free_register()
                 self.mips_interface.load_variable(register, child_node.name)
             else:
@@ -187,8 +186,20 @@ class MIPSConversionTextVisitor(ASTVisitor):
             result_register = self.mips_interface.get_free_register()
             self.mips_interface.last_expression_registers.append(result_register)
 
-            self.mips_interface.logical_not(result_register, register)
-
+            if node.operator == "!":
+                mips_instruction(
+                    self.mips_interface,
+                    result_register,
+                    register
+                )
+            else:
+                mips_instruction(
+                    self.mips_interface,
+                    result_register,
+                    register,
+                    "1"
+                )
+                self.mips_interface.store_in_variable(child_node.name, result_register)
             self.mips_interface.free_up_registers([register])
 
         self.visitChildren(node)

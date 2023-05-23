@@ -15,5 +15,8 @@ INSTRUCTIONS = {
     '==': MIPSInterface.equal,
     '!=': MIPSInterface.not_equal,
     '&&': MIPSInterface.logical_and,
-    '||': MIPSInterface.logical_or
+    '||': MIPSInterface.logical_or,
+    '!': MIPSInterface.logical_not,
+    '++': MIPSInterface.add_immediate_unsigned,
+    '--': MIPSInterface.subtract_immediate_unsigned
 }
