@@ -91,6 +91,10 @@ class MIPSInterface:
     def logical_or(self, register, argument1, argument2, is_float=False):
         self.append_instruction(f"or ${register}, ${argument1}, ${argument2}")
 
+    def logical_not(self, register, argument):
+        self.append_instruction(f"sltu ${register}, $zero, ${argument}")
+        self.append_instruction(f"xori ${register}, ${register}, 1")
+
     def append_string(self, string: str):
         string = string.replace('"', '')
         label = string.replace(' ', '_') + "_" + str(len(self.data))

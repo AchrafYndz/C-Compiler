@@ -172,6 +172,25 @@ class MIPSConversionTextVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitUnary_expression(self, node: UnaryExpressionNode):
+        # ++, --, &, *, !
+        child_node = node.children[0]
+        if node.operator == "!":
+            if isinstance(child_node, LiteralNode):
+                register = self.mips_interface.get_free_register()
+                self.mips_interface.load_immediate(register, child_node.value)
+            elif isinstance(child_node, VariableNode): 
+                register = self.mips_interface.get_free_register()
+                self.mips_interface.load_variable(register, child_node.name)
+            else:
+                register = self.mips_interface.last_expression_registers.pop(0)
+
+            result_register = self.mips_interface.get_free_register()
+            self.mips_interface.last_expression_registers.append(result_register)
+
+            self.mips_interface.logical_not(result_register, register)
+
+            self.mips_interface.free_up_registers([register])
+
         self.visitChildren(node)
 
     def visitVariable_definition(self, node: VariableDefinitionNode):
