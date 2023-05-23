@@ -31,7 +31,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
         type_ = get_type(node, self.symbol_table)
         type_ = TypeEnum.INT if type_ == TypeEnum.CHAR else type_
 
-        mips_instruction = INSTRUCTIONS[type_][node.operator]
+        mips_instruction = INSTRUCTIONS[node.operator]
         operators = []
         immediate = None
         for i, child_node in enumerate(node.children):
@@ -44,9 +44,22 @@ class MIPSConversionTextVisitor(ASTVisitor):
             else:
                 operators.append("t0")
         if immediate is not None:
-            self.mips_interface.add_immediate_unsigned("t0", operators[int(not immediate)], operators[immediate])
+            print(operators)
+            print(immediate)
+            mips_instruction(
+                self.mips_interface,
+                "t0",
+                operators[int(not immediate)],
+                operators[immediate],
+                immediate=immediate
+            )
         else:
-            self.mips_interface.add_unsigned("t0", operators[0], operators[1])
+            mips_instruction(
+                self.mips_interface,
+                "t0",
+                operators[0],
+                operators[1]
+            )
 
     def visitBranch(self, node: BranchNode):
         self.visitChildren(node)
@@ -123,12 +136,12 @@ class MIPSConversionTextVisitor(ASTVisitor):
             self.mips_interface.store_word(register1=register, offset=store_offset - (4 * index), register2="sp")
 
         self.mips_interface.move("fp", "sp")
-        self.mips_interface.subtract_unsigned("sp", "sp", (len(store_registers)+1) * 4)
+        self.mips_interface.subtract_unsigned("sp", "sp", (len(store_registers)+1) * 4, immediate=True)
 
         # function body code
         self.visitChildren(node)
 
-        self.mips_interface.add_immediate_unsigned("sp", "sp", (len(store_registers)+1) * 4)
+        self.mips_interface.add_unsigned("sp", "sp", (len(store_registers)+1) * 4, immediate=True)
         self.mips_interface.move("sp", "fp")
 
         for index, register in enumerate(reversed(store_registers)):

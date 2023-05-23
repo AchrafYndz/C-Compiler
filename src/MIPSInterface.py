@@ -15,6 +15,11 @@ class MIPSInterface:
         self.current_offset = 0
         self.local_offset = 0
 
+    def _swap_immediate_values(self, immediate_value, argument):
+        # load the immediate value into a register
+        self.load_immediate("t0", immediate_value)
+        return "t0", argument
+
     def exit(self):
         self.load_immediate("v0", 10)
         self.syscall()
@@ -25,14 +30,44 @@ class MIPSInterface:
     def load_immediate(self, register, value):
         self.append_instruction(f"li ${register}, {value}")
 
-    def subtract_unsigned(self, register1, register2, value):
-        self.append_instruction(f"subu ${register1}, ${register2}, {value}")
+    def subtract_unsigned(self, register, argument1, argument2, immediate=-1, is_float=False):
+        operation = "subiu" if immediate != -1 else "subu"
+        operation = operation if not is_float else "sub.s"
+        if immediate == 0:
+            argument1, argument2 = self._swap_immediate_values(argument2, argument1)
+            operation = "subu"
+        self.append_instruction(f"{operation} ${register}, ${argument1}, {'' if immediate == 1 else '$'}{argument2}")
 
-    def add_immediate_unsigned(self, register1, register2, value):
-        self.append_instruction(f"addiu ${register1}, ${register2}, {value}")
+    def add_unsigned(self, register, argument1, argument2, immediate=-1, is_float=False):
+        operation = "addiu" if immediate != -1 else "addu"
+        operation = operation if not is_float else "add.s"
+        self.append_instruction(f"{operation} ${register}, ${argument1}, {'' if immediate != -1 else '$'}{argument2}")
 
-    def add_unsigned(self, register1, register2, register3):
-        self.append_instruction(f"addu ${register1}, ${register2}, ${register3}")
+    def multiply(self, register, argument1, argument2, immediate=-1, is_float=False):
+        operation = "mul" if not is_float else "mul.s"
+        self.append_instruction(f"{operation} ${register}, ${argument1}, {'' if immediate != -1 else '$'}{argument2}")
+
+    def divide(self, register, argument1, argument2, immediate=-1, is_float=False):
+        operation = "div" if not is_float else "div.s"
+        if immediate == 0:
+            argument1, argument2 = self._swap_immediate_values(argument2, argument1)
+        self.append_instruction(f"{operation} ${register}, ${argument1}, {'' if immediate == 1 else '$'}{argument2}")
+
+    def modulo(self, register, argument1, argument2, immediate=-1, is_float=False):
+        assert (not is_float)
+        if immediate == 0:
+            argument1, argument2 = self._swap_immediate_values(argument2, argument1)
+        self.append_instruction(f"rem ${register}, ${argument1}, {'' if immediate == 1 else '$'}{argument2}")
+
+    def strictly_less(self, register, argument1, argument2, immediate=-1, is_float=False):
+        operation = "slti" if immediate == 1 else "slt"
+        if immediate == 0:
+            argument1, argument2 = self._swap_immediate_values(argument2, argument1)
+            operation = "slt"
+        self.append_instruction(f"{operation} ${register}, ${argument1}, {'' if immediate == 1 else '$'}{argument2}")
+
+    def greater_or_equal(self, register, argument1, argument2, immediate, is_float):
+        pass
 
     def append_string(self, string: str):
         string = string.replace('"', '')

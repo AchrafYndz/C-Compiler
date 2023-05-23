@@ -1,9 +1,9 @@
 #include <stdio.h>
 
 int main() {
-    char a = 'a';
-    a = 'a';
-    int b =  a + a;
-    printf("%i", b);
+    char b = 'b';
+    b = 'b';
+    int c =  3 < (b - 1);
+    printf("%i", c);
     return 0;
 }
