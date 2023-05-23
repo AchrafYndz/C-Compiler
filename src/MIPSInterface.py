@@ -114,8 +114,8 @@ class MIPSInterface:
             self.store_word("s0", self.current_offset, "gp")
         self.current_offset -= 4
 
-    def append_variable(self, var_name):
-        self.store_word("t0", self.local_offset, "sp")
+    def append_variable(self, register, var_name):
+        self.store_word(register, self.local_offset, "sp")
         self.local_variables[var_name] = self.local_offset
         self.local_offset += 4
 
