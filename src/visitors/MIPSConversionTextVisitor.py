@@ -202,6 +202,21 @@ class MIPSConversionTextVisitor(ASTVisitor):
                 self.mips_interface.store_in_variable(child_node.name, result_register)
             self.mips_interface.free_up_registers([register])
 
+        elif node.operator == "&":
+            register = self.mips_interface.get_free_register()
+            offset = self.mips_interface.local_variables[child_node.name]
+            self.mips_interface.load_address(register, f"{offset}($sp)")
+            self.mips_interface.last_expression_registers.append(register)
+
+        elif node.operator == "*":
+            register = self.mips_interface.get_free_register()
+            self.mips_interface.load_variable(register, child_node.name)
+            self.mips_interface.load_word(register, 0, register)
+            self.mips_interface.last_expression_registers.append(register)
+
+        else:
+            raise ValueError("Expected unary expression to have operator ++, --, &, * or !")
+
         self.visitChildren(node)
 
     def visitVariable_definition(self, node: VariableDefinitionNode):
