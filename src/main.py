@@ -23,10 +23,12 @@ def main(argv):
     lexer = CLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = CParser(stream)
-    tree = parser.program()
 
     parser.removeErrorListeners()
     parser.addErrorListener(ASTErrorListener())
+
+    tree = parser.program()
+
 
     walker = ParseTreeWalker()
     ast_creator = ASTCreator()
