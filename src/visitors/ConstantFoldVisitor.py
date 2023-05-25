@@ -177,10 +177,6 @@ class ConstantFoldVisitor(ASTVisitor):
         self.symbol_table.leave_scope()
 
     def visitLoop(self, node: LoopNode):
-        self.const_table = {}
-
-    def visitVariable(self, node: VariableNode):
-        value = self.get_value_from_const_table(node.name, self.symbol_table.current_scope)
-        if value:
-            type_ = get_literal_type(value)
-            self.replace_child(node, None, value, type_)
+        for child in node.children[1:]:
+            visit_method = self.nodes_dict[type(child)]
+            visit_method(child)
