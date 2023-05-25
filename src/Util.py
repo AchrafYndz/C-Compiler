@@ -81,6 +81,17 @@ def get_type(node, symbol_table):
     return enum_type
 
 
+def get_literal_type(value):
+    try:
+        float_value = float(value)
+        if '.' in value:
+            return TypeEnum.FLOAT
+        else:
+            return TypeEnum.INT
+    except ValueError:
+        return TypeEnum.STRING
+
+
 def cast_to_type(type_, value):
     if type_ == TypeEnum.FLOAT:
         return float(value)
