@@ -3,6 +3,7 @@ from src.visitors.ASTVisitor import *
 from src.Util import auto_cast, returns_something, has_duplicates, look_in_parent, extract_print_types, \
     extract_scan_types, extract_leaves, get_type
 from src.Type import TypeEnum
+from src.Logger import Logger
 
 
 class SemanticAnalysisVisitor(ASTVisitor):
@@ -17,22 +18,22 @@ class SemanticAnalysisVisitor(ASTVisitor):
                 var_name = node.name
                 var_obj = self.symbol_table.get_variable(var_name)
                 if not var_obj.is_assigned:
-                    raise ValueError(f"Undefined variable {var_name} cannot be used in {expression_type}")
+                    Logger.get_instance().log_error(f"Undefined variable {var_name} cannot be used in {expression_type}")
 
     def check_not_const(self, node):
         var_name = node.name
         var_obj = self.symbol_table.get_variable(var_name)
         if var_obj.is_const:
-            raise ValueError(f"Const variable `{var_name}` cannot be modified")
+            Logger.get_instance().log_error(f"Const variable `{var_name}` cannot be modified")
 
     def visitArray_assignment(self, node: ArrayAssignmentNode):
         if not isinstance(node.index, int):
-            raise ValueError("The index of an array must be an integer.")
+            Logger.get_instance().log_error("The index of an array must be an integer.")
 
         # Array Access Type Mismatch
         array_obj = self.symbol_table.get_variable(node.name)
         if not isinstance(array_obj, Array):
-            raise ValueError(f"Invalid array access usage on variable of type {array_obj.type_.name}")
+            Logger.get_instance().log_error(f"Invalid array access usage on variable of type {array_obj.type_.name}")
         self.visitChildren(node)
 
     def visitAssignment(self, node: AssignmentNode):
@@ -44,7 +45,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
             function_obj = self.symbol_table.get_variable(assignee.name)
             assigned_obj = self.symbol_table.get_variable(node.name)
             if function_obj.type_ == TypeEnum.VOID:
-                raise ValueError(
+                Logger.get_instance().log_error(
                     f"Incompatible assignment from type {function_obj.type_.name} to {assigned_obj.type_.name}")
 
         # check if variable is declared
@@ -58,7 +59,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
             index_node = node.children[1]
             if isinstance(index_node, LiteralNode):
                 if not isinstance(auto_cast(index_node.value), int):
-                    raise ValueError("The index of an array must be an integer.")
+                    Logger.get_instance().log_error("The index of an array must be an integer.")
         leaves = []
         extract_leaves(node, leaves)
         # Binary operation between 2 or more pointers
@@ -71,7 +72,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
                     if var_obj.ptr_level > 0:
                         pointer_vars += 1
             if pointer_vars >= 2:
-                raise ValueError(f"Invalid operands to binary `{node.operator}` between {pointer_vars} pointers.")
+                Logger.get_instance().log_error(f"Invalid operands to binary `{node.operator}` between {pointer_vars} pointers.")
         # Binary operation with at least one array
         if node.operator != "[]":
             for leaf in leaves:
@@ -79,7 +80,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
                     var_name = leaf.name
                     var_obj = self.symbol_table.get_variable(var_name)
                     if var_obj.isArray():
-                        raise ValueError(f"Cannot use array in binary operation")
+                        Logger.get_instance().log_error(f"Cannot use array in binary operation")
         # Check that all variables used are defined
         self.check_is_defined(leaves, "binary expression")
 
@@ -92,7 +93,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
         if node.sort == "return":
             found = False
             if not look_in_parent(node, FunctionNode, found):
-                raise ValueError("Cannot return outside of a function.")
+                Logger.get_instance().log_error("Cannot return outside of a function.")
 
             if node.children:
                 to_return = node.children[0]
@@ -100,7 +101,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
         else:
             found = False
             if not look_in_parent(node, LoopNode, found):
-                raise ValueError("Invalid use of loop control statement.")
+                Logger.get_instance().log_error("Invalid use of loop control statement.")
 
         self.visitChildren(node)
 
@@ -124,7 +125,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
             self.check_is_defined(leaves, "function call")
 
         if function_obj.args and len(node.children) != len(function_obj.args):
-            raise ValueError(f"Function {function_obj.name} expected {len(function_obj.args)} arguments,"
+            Logger.get_instance().log_error(f"Function {function_obj.name} expected {len(function_obj.args)} arguments,"
                              f" got {len(node.children)} instead.")
         if not function_obj.args:
             # printf or scanf
@@ -136,7 +137,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
                 # Make sure same amount of arguments
                 if len(func_types) != len(node.children[1:]):
-                    raise ValueError(f"printf function expected {len(func_types)} arguments, "
+                    Logger.get_instance().log_error(f"printf function expected {len(func_types)} arguments, "
                                      f"got {len(node.children[1:])}")
 
                 # Make sure type of argument matches
@@ -165,10 +166,10 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
                         continue
                     if "s" in func_type and arg_type not in ["STRING", "CHAR[]"]:
-                        raise ValueError(f"{function_obj.name} expected {func_type}, but did not get a string")
+                        Logger.get_instance().log_error(f"{function_obj.name} expected {func_type}, but did not get a string")
 
                     if arg_type in ["STRING", "CHAR[]"] and "s" not in func_type:
-                        raise ValueError(f"{function_obj.name} expected {func_type}, but got a string instead")
+                        Logger.get_instance().log_error(f"{function_obj.name} expected {func_type}, but got a string instead")
 
         self.visitChildren(node)
 
@@ -185,34 +186,34 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
         returns = False
         if returns_something(node, returns) and type_node.type.type == TypeEnum.VOID:
-            raise ValueError("Returning something in void function.")
+            Logger.get_instance().log_error("Returning something in void function.")
 
         # parameter redefinition
         args_names = [child.name for child in node.children if isinstance(child, FunctionArgumentNode)]
         if has_duplicates(args_names):
-            raise ValueError("Cannot redefine function parameters.")
+            Logger.get_instance().log_error("Cannot redefine function parameters.")
 
         # definition of predeclared function
         forward_declaration: Function = self.symbol_table.get_variable(variable_node.name, expected=False)
         if forward_declaration:
             # make sure it is not redefined
             if forward_declaration.is_assigned:
-                raise ValueError(f"Redefinition of function {variable_node.name}")
+                Logger.get_instance().log_error(f"Redefinition of function {variable_node.name}")
 
             # make sure it has the same return value
             if forward_declaration.type_ != type_node.type.type:
-                raise ValueError(f"Definition of forward declared function {variable_node.name} "
+                Logger.get_instance().log_error(f"Definition of forward declared function {variable_node.name} "
                                  f"has a different return type.")
 
             # make sure it has the same number of arguments
             if len(forward_declaration.args) != args_count:
-                raise ValueError(f"Definition of forward declared function {variable_node.name} "
+                Logger.get_instance().log_error(f"Definition of forward declared function {variable_node.name} "
                                  f"expected {len(forward_declaration.args)} arguments, got {args_count} instead.")
 
             # make sure the type of the arguments is the same
             for index, (previous_variable, current_node) in enumerate(zip(forward_declaration.args, args_nodes)):
                 if previous_variable.type_ != current_node.type.type:
-                    raise ValueError(f"Definition of forward declared function {variable_node.name} "
+                    Logger.get_instance().log_error(f"Definition of forward declared function {variable_node.name} "
                                     f"expected argument {index+1} to be type {previous_variable.type_.name}, "
                                      f"got {current_node.type.type.name} instead.")
 
@@ -246,7 +247,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
     def visitInclude(self, node: IncludeNode):
         if node.to_include != "stdio.h":
-            raise ValueError(f"Invalid include of file {node.to_include}")
+            Logger.get_instance().log_error(f"Invalid include of file {node.to_include}")
         printf_func = Function(
             name="printf",
             type_=TypeEnum.INT,
@@ -272,7 +273,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
         if isinstance(node.parent, UnaryExpressionNode):
             parentNode = node.parent
             if parentNode.operator == "*":
-                raise ValueError(f"Cannot dereference a literal of type {node.type.name}")
+                Logger.get_instance().log_error(f"Cannot dereference a literal of type {node.type.name}")
 
         self.visitChildren(node)
 
@@ -300,7 +301,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
         self.visitChildren(node)
 
         if not node.parent and not self.found_main:
-            raise ValueError("Main not defined")
+            Logger.get_instance().log_error("Main not defined")
 
         self.symbol_table.leave_scope()
 
@@ -318,7 +319,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
             if not isinstance(operand_node, VariableNode) and \
                     not (isinstance(operand_node, UnaryExpressionNode) and operand_node.operator == "*")\
                     and not (isinstance(operand_node, BinaryExpressionNode) and operand_node.operator == "[]"):
-                raise ValueError("Dereference expected lvalue")
+                Logger.get_instance().log_error("Dereference expected lvalue")
 
         self.visitChildren(node)
 
@@ -329,7 +330,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
             if node.has_array_size:
                 array_size_node: LiteralNode = node.children[0]
                 if array_size_node.type != TypeEnum.INT:
-                    raise ValueError("Array index should be of type int")
+                    Logger.get_instance().log_error("Array index should be of type int")
             variable_obj = Array(
                 name=node.name,
                 type_=node.type.type,
@@ -365,7 +366,8 @@ class SemanticAnalysisVisitor(ASTVisitor):
                 #             right_type = var_obj.type_.value
 
                 if left_type < right_type.value:
-                    print(f"Implicit conversion from {TypeEnum(right_type).name} to {TypeEnum(left_type).name}")
+                    Logger.get_instance().log_warning(f"Implicit conversion from "
+                                                      f"{TypeEnum(right_type).name} to {TypeEnum(left_type).name}")
 
         self.symbol_table.add_variable(variable_obj)
 

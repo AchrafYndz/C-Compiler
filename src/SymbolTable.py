@@ -1,3 +1,4 @@
+from src.Logger import Logger
 from src.Type import TypeEnum
 
 
@@ -44,9 +45,9 @@ class Scope:
         # search in current scope
         if variable.name in self.table.keys():
             if self.table[variable.name].is_assigned:
-                raise ValueError(f"Variable {variable.name} already defined in this scope.")
+                Logger.get_instance().log_error(f"Variable {variable.name} already defined in this scope.")
             else:
-                raise ValueError(f"Variable {variable.name} already declared in this scope.")
+                Logger.get_instance().log_error(f"Variable {variable.name} already declared in this scope.")
 
         self.table[variable.name] = variable
 
@@ -60,7 +61,7 @@ class Scope:
             return self.parent_scope.get_variable(identifier, expected)
 
         if expected:
-            raise ValueError(f"Variable {identifier} not defined.")
+            Logger.get_instance().log_error(f"Variable {identifier} not defined.")
         else:
             return None
 
@@ -70,14 +71,15 @@ class Scope:
     def check_is_const(self, identifier: str):
         return self.get_variable(identifier).is_const
 
-    def alter_identifier(self, name, type_=None, is_const=None, is_assigned=None, ptr_level=None, array_size=None, args=None):
+    def alter_identifier(self, name, type_=None, is_const=None, is_assigned=None, ptr_level=None, array_size=None,
+                         args=None):
         previous_variable = self.get_variable(name)
 
         new_type = type_ if type_ else previous_variable.type_
         new_is_const = is_const if is_const else previous_variable.is_const
         new_is_assigned = is_assigned if is_assigned else previous_variable.is_assigned
         new_ptr_level = ptr_level if ptr_level else previous_variable.ptr_level
-        
+
         if previous_variable.isArray():
             new_array_size = array_size if array_size else previous_variable.array_count
             self.table[name] = \
@@ -136,5 +138,6 @@ class SymbolTable:
         assert (self.current_scope is not None)
         return self.current_scope.check_is_assigned(identifier)
 
-    def alter_identifier(self, name, type_=None, is_const=None, is_assigned=None, ptr_level=None, array_size=None, args=None):
+    def alter_identifier(self, name, type_=None, is_const=None, is_assigned=None, ptr_level=None, array_size=None,
+                         args=None):
         self.current_scope.alter_identifier(name, type_, is_const, is_assigned, ptr_level, array_size, args)

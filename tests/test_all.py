@@ -66,8 +66,7 @@ def test_semantic_analysis():
 
             root.visualize(filename="semantic_test")
 
-            with pytest.raises(Exception) as exception:
+            with pytest.raises(SystemExit):
                 ast_semantic_visitor = SemanticAnalysisVisitor()
                 # run semantic analysis
                 ast_semantic_visitor.visitScope(root)
-            print(f"{exception.typename}: {exception.value}")
