@@ -148,6 +148,11 @@ class ConstantFoldVisitor(ASTVisitor):
                 # therefore the safest option is clearing the table completely after such a function call
                 if var_obj.ptr_level > 0:
                     self.const_table = {}
+        if func_name == "scanf":
+            args_children = node.children[1:]
+            for child in args_children:
+                if isinstance(child, VariableNode):
+                    self.delete_from_table(child.name, self.symbol_table.current_scope)
         self.visitChildren(node)
 
     def visitExplicit_conversion(self, node: ExplicitConversionNode):
