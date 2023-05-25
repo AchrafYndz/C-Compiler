@@ -230,6 +230,7 @@ fabric.properties
 
 # The file we use to test new functionality
 tests/input/test.c
+tests/input/mips/test.c
 
 # Mips tests output files
 tests/output/mips/*.asm
