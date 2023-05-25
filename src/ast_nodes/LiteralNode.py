@@ -9,4 +9,4 @@ class LiteralNode(ASTNode):
         self.type: TypeEnum = type_
 
     def getLabel(self):
-        return "Literal: " + self.value
+        return f"Literal: {self.value} [{self.type.name}]"
