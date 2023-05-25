@@ -309,7 +309,9 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
     def visitUnary_expression(self, node: UnaryExpressionNode):
         if node.operator in ["++", "--"]:
-            self.check_not_const(node.children[0])
+            child = node.children[0]
+            if isinstance(child, VariableNode):
+                self.check_not_const(child)
         operand_node = node.children[0]
         self.check_is_defined([operand_node], "unary expression")
         if node.operator in ["&", "++", "--"]:

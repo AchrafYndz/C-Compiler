@@ -10,7 +10,7 @@ from src.visitors.SemanticAnalysisVisitor import SemanticAnalysisVisitor
 
 
 def test_ast_creation():
-    directory = 'tests/input/mips'
+    directory = 'tests/input/llvm'
     counter = 0
     for filename in os.listdir(directory):
         if filename.endswith('.c'):
