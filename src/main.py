@@ -9,13 +9,13 @@ from src.antlr.CParser import CParser
 from src.ASTCreator import ASTCreator
 from src.AST import AST
 from src.ASTErrorListener import ASTErrorListener
-from src.visitors.MIPSConversionTextVisitor import MIPSConversionTextVisitor
 
 from src.visitors.SemanticAnalysisVisitor import SemanticAnalysisVisitor
 from src.visitors.ConstantFoldVisitor import ConstantFoldVisitor
 
 
-RUN_MIPS = True
+RUN_MIPS = False
+OPTIMIZE = True
 
 
 def main(argv):
@@ -41,10 +41,11 @@ def main(argv):
     ast_semantic_visitor.visitScope(ast.root)
 
     # constant fold
-    constant_fold_visitor = ConstantFoldVisitor(
-        symbol_table=ast_semantic_visitor.symbol_table
-    )
-    constant_fold_visitor.visitScope(ast.root)
+    if OPTIMIZE:
+        constant_fold_visitor = ConstantFoldVisitor(
+            symbol_table=ast_semantic_visitor.symbol_table
+        )
+        constant_fold_visitor.visitScope(ast.root)
 
     ast.visualize(filename="test")
 
