@@ -1,6 +1,6 @@
 from src.SymbolTable import SymbolTable, Scope
 from src.visitors.ASTVisitor import *
-from src.Util import get_type, cast_to_type
+from src.Util import get_type, cast_to_type, get_literal_type
 
 
 class ConstantFoldVisitor(ASTVisitor):
@@ -175,3 +175,12 @@ class ConstantFoldVisitor(ASTVisitor):
         self.symbol_table.enter_scope(scope_to_enter)
         self.visitChildren(node)
         self.symbol_table.leave_scope()
+
+    def visitLoop(self, node: LoopNode):
+        self.const_table = {}
+
+    def visitVariable(self, node: VariableNode):
+        value = self.get_value_from_const_table(node.name, self.symbol_table.current_scope)
+        if value:
+            type_ = get_literal_type(value)
+            self.replace_child(node, None, value, type_)
