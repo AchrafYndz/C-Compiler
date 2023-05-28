@@ -50,7 +50,7 @@
   - [x] Constant Propagation
   - [x] Convert for-loops to while-loops
   - [ ] Convert switch statements to if-statements*
-  - [ ] Optimizations
+  - [x] Optimizations
     - [x] Do not generate code for statements after `return`
     - [x] Do not generate code for statements after `break` or `continue`
     - [ ] Do not generate code for unused variables*
@@ -65,10 +65,10 @@
       - [x] Assignment to an rvalue.
       - [x] Assignment to a const variable.
       - [x] Implicit Conversions warning*
-      - [ ] Semantic Analysis visitor should support scoping
-      - [ ] Semantic Analysis visitor should support function scopes
-      - [ ] Consistency return statement with return type of function
-      - [ ] Consistency forward declaration and function definition
+      - [x] Semantic Analysis visitor should support scoping
+      - [x] Semantic Analysis visitor should support function scopes
+      - [x] Consistency return statement with return type of function
+      - [x] Consistency forward declaration and function definition
       - [ ] For non-void functions, check that in all cases it ends with a return statement*
         
 - [ ] Mips
