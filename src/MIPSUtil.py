@@ -1,5 +1,5 @@
 from src.Type import TypeEnum
-from MIPSInterface import MIPSInterface
+from src.MIPSInterface import MIPSInterface
 
 
 INSTRUCTIONS = {
