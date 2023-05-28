@@ -82,22 +82,22 @@
     - [x] Printf
     - [x] Pointers + pointer operators
     - [x] Local and Global variables
+    - [x] Function Scopes
+    - [x] Functions
+    - [x] Void Functions
+    - [x] Function Definitions
+    - [x] Function Calls
+    - [x] Return Keyword
+    - [x] Include `stdio.h`
     - [ ] Conversions (bool <> char <> int <> float)
-    - [ ] Function Scopes
-    - [ ] Functions
-    - [ ] Function Definitions
-    - [ ] Function Calls
     - [ ] Arguments
-    - [ ] Return Keyword
-    - [ ] Void Functions
     - [ ] Arrays
-    - [ ] Multidimensional arrays*
-    - [ ] Assignments of Array rows/complete arrays in case of multidimensional arrays*
-    - [ ] Dynamic arrays*
-    - [ ] Include `stdio.h`
     - [ ] Conditional Statements: `if` and `else`
     - [ ] Loops: `while`, `for`, `break`, `continue`
     - [ ] Unnamed Scopes
-    - [ ] Switch Statements: `switch`, `case`, `break`, `default`
+    - [ ] Switch Statements: `switch`, `case`, `break`, `default`*
+    - [ ] Multidimensional arrays*
+    - [ ] Assignments of Array rows/complete arrays in case of multidimensional arrays*
+    - [ ] Dynamic arrays*
     - [ ] Include comments in compiled MIPS*
     - [ ] C code comments for each instruction*
