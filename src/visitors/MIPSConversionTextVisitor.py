@@ -16,16 +16,20 @@ class MIPSConversionTextVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitAssignment(self, node: AssignmentNode):
+        self.visitChildren(node)
         if len(node.children) == 1:
             if isinstance(node.children[0], LiteralNode):
+                register = "t0"
                 self.mips_interface.load_immediate("t0", node.children[0].value)
             elif isinstance(node.children[0], VariableNode):
+                register = "t0"
                 self.mips_interface.load_variable("t0", node.children[0].name)
             elif isinstance(node.children[0], FunctionCallNode):
+                register = "t0"
                 self.mips_interface.move("t0", "v0")
-        self.mips_interface.store_in_variable(node.name)
-
-        self.visitChildren(node)
+            else:
+                register = self.mips_interface.last_expression_registers.pop(0)
+            self.mips_interface.store_in_variable(node.name, register)
 
     def visitBinary_expression(self, node: BinaryExpressionNode):
         self.visitChildren(node)
@@ -59,8 +63,6 @@ class MIPSConversionTextVisitor(ASTVisitor):
         )
         self.mips_interface.free_up_registers(operators)
 
-        print(self.mips_interface.last_expression_registers)
-
     def visitBranch(self, node: BranchNode):
         self.visitChildren(node)
         if node.sort == "return":
@@ -79,6 +81,8 @@ class MIPSConversionTextVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitFunction_call(self, node: FunctionCallNode):
+        self.visitChildren(node)
+
         if node.name == "printf":
             if len(node.children) == 1:
                 # must be a string
@@ -115,8 +119,11 @@ class MIPSConversionTextVisitor(ASTVisitor):
                     self.mips_interface.add_immediate_unsigned(f"a{i}", "zero", arg.value)
                 elif isinstance(arg, VariableNode):
                     self.mips_interface.load_variable(f"a{i}", arg.name)
+                else:
+                    # expression
+                    expression_register = self.mips_interface.last_expression_registers.pop(0)
+                    self.mips_interface.move(f"a{i}", expression_register)
             self.mips_interface.jump_and_link(node.name)
-        self.visitChildren(node)
 
     def visitFunction(self, node: FunctionNode):
         '''
@@ -184,6 +191,8 @@ class MIPSConversionTextVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitUnary_expression(self, node: UnaryExpressionNode):
+        self.visitChildren(node)
+
         # ++, --, &, *, !
         child_node = node.children[0]
         if node.operator in ["!", "++", "--"]:
@@ -205,6 +214,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
                     register
                 )
             else:
+                # ++, --
                 mips_instruction(
                     self.mips_interface,
                     result_register,
@@ -212,6 +222,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
                     "1"
                 )
                 self.mips_interface.store_in_variable(child_node.name, result_register)
+                self.mips_interface.last_expression_registers.pop(0)
             self.mips_interface.free_up_registers([register])
 
         elif node.operator == "&":
@@ -228,8 +239,6 @@ class MIPSConversionTextVisitor(ASTVisitor):
 
         else:
             raise ValueError("Expected unary expression to have operator ++, --, &, * or !")
-
-        self.visitChildren(node)
 
     def visitVariable_definition(self, node: VariableDefinitionNode):
         self.visitChildren(node)

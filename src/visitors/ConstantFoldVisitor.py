@@ -104,6 +104,15 @@ class ConstantFoldVisitor(ASTVisitor):
     def visitUnary_expression(self, node: UnaryExpressionNode):
         self.visitChildren(node)
 
+        # Remove variable from const table if it was incremented/decremented
+        if node.operator in ["++", "--"]:
+            operand_node = node.children[0]
+            if isinstance(operand_node, VariableNode):
+                var_name = operand_node.name
+                self.delete_from_table(var_name, self.symbol_table.current_scope)
+            return
+
+        # !, &, *
         operation = node.operator if node.operator not in self.operations_translation \
             else self.operations_translation[node.operator]
         operand_node = node.children[0]
@@ -119,21 +128,12 @@ class ConstantFoldVisitor(ASTVisitor):
         if not value or node.operator in ["&", "*"]:
             return
 
-        # TODO: Differentiate between postfix and prefix
-        if operation in ["++", "--"]:
-            result = str(eval(f"{value} {operation[0]} 1"))
-        else:
-            result = str(eval(f"{operation} {value}"))
+        result = str(eval(f"{operation} {value}"))
 
         type_ = get_type(node, self.symbol_table)
         self.replace_child(node, operation, result, type_)
 
-        # Remove variable from const table if it was incremented/decremented
-        if node.operator in ["++", "--"]:
-            operand_node = node.children[0]
-            if isinstance(operand_node, VariableNode):
-                var_name = operand_node.name
-                self.delete_from_table(var_name, self.symbol_table.current_scope)
+
 
     def visitFunction_call(self, node: FunctionCallNode):
         func_name = node.name
