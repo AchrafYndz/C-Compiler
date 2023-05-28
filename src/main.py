@@ -12,7 +12,7 @@ from src.ASTErrorListener import ASTErrorListener
 
 from src.visitors.SemanticAnalysisVisitor import SemanticAnalysisVisitor
 from src.visitors.ConstantFoldVisitor import ConstantFoldVisitor
-
+from src.visitors.TranslationVisitor import TranslationVisitor
 
 RUN_MIPS = False
 OPTIMIZE = True
@@ -29,7 +29,6 @@ def main(argv):
 
     tree = parser.program()
 
-
     walker = ParseTreeWalker()
     ast_creator = ASTCreator()
     walker.walk(ast_creator, tree)
@@ -37,6 +36,10 @@ def main(argv):
     # create AST tree
     ast_creator.enterProgram(tree)
     ast = AST(ast_creator.root)
+
+    # translate for to while
+    translator = TranslationVisitor()
+    translator.visitScope(ast.root)
 
     # run semantic analysis
     ast_semantic_visitor = SemanticAnalysisVisitor()

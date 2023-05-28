@@ -33,8 +33,9 @@ class ASTNode:
             dot_file = Source.from_file(f"visualization/{filename}.dot")
             dot_file.render(filename=filename, directory="visualization/", format="pdf", cleanup=True, view=False)
 
-    def addChild(self, child):
+    def addChild(self, child, index=-1):
         child.parent = self
-        self.children.append(child)
-
-
+        if index == -1:
+            self.children.append(child)
+        else:
+            self.children.insert(index, child)
