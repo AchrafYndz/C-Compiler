@@ -1,6 +1,6 @@
 from src.SymbolTable import SymbolTable, Scope
 from src.visitors.ASTVisitor import *
-from src.Util import get_type, cast_to_type, get_literal_type
+from src.Util import get_type, cast_to_type
 
 
 class ConstantFoldVisitor(ASTVisitor):

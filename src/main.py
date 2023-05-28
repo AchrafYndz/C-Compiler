@@ -9,13 +9,14 @@ from src.antlr.CParser import CParser
 from src.ASTCreator import ASTCreator
 from src.AST import AST
 from src.ASTErrorListener import ASTErrorListener
+from src.visitors.OptimizationVisitor import OptimizationVisitor
 
 from src.visitors.SemanticAnalysisVisitor import SemanticAnalysisVisitor
 from src.visitors.ConstantFoldVisitor import ConstantFoldVisitor
 from src.visitors.TranslationVisitor import TranslationVisitor
 
 
-def run(input_file, optimize, run_mips):
+def run(input_file, const_folding, optimize, run_mips):
     input_stream = FileStream(input_file)
     lexer = CLexer(input_stream)
     stream = CommonTokenStream(lexer)
@@ -38,12 +39,17 @@ def run(input_file, optimize, run_mips):
     translator = TranslationVisitor()
     translator.visitScope(ast.root)
 
+    # optimize
+    if optimize:
+        optimizer = OptimizationVisitor()
+        optimizer.visitScope(ast.root)
+
     # run semantic analysis
     ast_semantic_visitor = SemanticAnalysisVisitor()
     ast_semantic_visitor.visitScope(ast.root)
 
-    # constant fold
-    if optimize:
+    if const_folding:
+        # constant fold
         constant_fold_visitor = ConstantFoldVisitor(
             symbol_table=ast_semantic_visitor.symbol_table
         )
@@ -67,6 +73,7 @@ def run(input_file, optimize, run_mips):
 def main(argv):
     run(
         input_file=argv[1],
+        const_folding=True,
         optimize=True,
         run_mips=False
     )
