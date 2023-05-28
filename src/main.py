@@ -14,12 +14,9 @@ from src.visitors.SemanticAnalysisVisitor import SemanticAnalysisVisitor
 from src.visitors.ConstantFoldVisitor import ConstantFoldVisitor
 from src.visitors.TranslationVisitor import TranslationVisitor
 
-RUN_MIPS = False
-OPTIMIZE = True
 
-
-def main(argv):
-    input_stream = FileStream(argv[1])
+def run(input_file, optimize, run_mips):
+    input_stream = FileStream(input_file)
     lexer = CLexer(input_stream)
     stream = CommonTokenStream(lexer)
     parser = CParser(stream)
@@ -46,7 +43,7 @@ def main(argv):
     ast_semantic_visitor.visitScope(ast.root)
 
     # constant fold
-    if OPTIMIZE:
+    if optimize:
         constant_fold_visitor = ConstantFoldVisitor(
             symbol_table=ast_semantic_visitor.symbol_table
         )
@@ -55,7 +52,7 @@ def main(argv):
     ast.visualize(filename="test")
 
     # generate mips code
-    if RUN_MIPS:
+    if run_mips:
         mips_converter = MIPSConverter(
             symbol_table=ast_semantic_visitor.symbol_table,
         )
@@ -65,6 +62,14 @@ def main(argv):
         print("Running Mips...")
         print("----------------------------------------")
         subprocess.call(["java", "-jar", "bin/Mars4_5.jar", "tests/output/mips/test.asm"])
+
+
+def main(argv):
+    run(
+        input_file=argv[1],
+        optimize=True,
+        run_mips=False
+    )
 
 
 if __name__ == '__main__':
