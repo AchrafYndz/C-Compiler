@@ -21,6 +21,8 @@ class MIPSConversionTextVisitor(ASTVisitor):
                 self.mips_interface.load_immediate("t0", node.children[0].value)
             elif isinstance(node.children[0], VariableNode):
                 self.mips_interface.load_variable("t0", node.children[0].name)
+            elif isinstance(node.children[0], FunctionCallNode):
+                self.mips_interface.move("t0", "v0")
         self.mips_interface.store_in_variable(node.name)
 
         self.visitChildren(node)
@@ -61,6 +63,8 @@ class MIPSConversionTextVisitor(ASTVisitor):
 
     def visitBranch(self, node: BranchNode):
         self.visitChildren(node)
+        if node.sort == "return":
+            self.mips_interface.move("v0", self.mips_interface.last_expression_registers.pop(0))
 
     def visitConditional(self, node: ConditionalNode):
         self.visitChildren(node)
@@ -106,6 +110,9 @@ class MIPSConversionTextVisitor(ASTVisitor):
                     else:
                         self.mips_interface.print(to_print, type_, is_variable)
         else:
+            for i, arg in enumerate(node.children):
+                if isinstance(arg, LiteralNode):
+                    self.mips_interface.add_immediate_unsigned(f"a{i}", "zero", arg.value)
             self.mips_interface.jump_and_link(node.name)
         self.visitChildren(node)
 
@@ -135,6 +142,9 @@ class MIPSConversionTextVisitor(ASTVisitor):
 
         self.mips_interface.move("fp", "sp")
         self.mips_interface.subtract_immediate_unsigned("sp", "sp", (len(store_registers)+1) * 4)
+
+        for i, arg_node in enumerate(args_nodes):
+            self.mips_interface.append_variable(f"a{i}", arg_node.name)
 
         # function body code
         self.visitChildren(node)
@@ -235,6 +245,9 @@ class MIPSConversionTextVisitor(ASTVisitor):
             elif isinstance(node.children[0], VariableNode):
                 register = self.mips_interface.get_free_register()
                 self.mips_interface.load_variable(register, node.children[0].name)
+            elif isinstance(node.children[0], FunctionCallNode):
+                register = self.mips_interface.get_free_register()
+                self.mips_interface.move(register, "v0")
             else:
                 register = self.mips_interface.last_expression_registers.pop(0)
             self.mips_interface.append_variable(register, node.name)

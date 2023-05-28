@@ -75,7 +75,7 @@ def main(argv):
         input_file=argv[1],
         const_folding=True,
         optimize=True,
-        run_mips=False
+        run_mips=True
     )
 
 

@@ -91,6 +91,8 @@
     - [x] Include `stdio.h`
     - [ ] Conversions (bool <> char <> int <> float)
     - [ ] Arguments
+    - [ ] Printf with text arguments e.g. `printf("Hello, %s\n", name)`;
+    - [ ] Scanf
     - [ ] Arrays
     - [ ] Conditional Statements: `if` and `else`
     - [ ] Loops: `while`, `for`, `break`, `continue`

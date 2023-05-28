@@ -168,6 +168,8 @@ class MIPSInterface:
 
         file.write(".text\n")
         for line in self.text:
+            if line[-1] == ":":
+                file.write("\n")
             file.write(line + '\n')
         file.close()
 
