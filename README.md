@@ -51,7 +51,7 @@
   - [x] Convert for-loops to while-loops
   - [ ] Convert switch statements to if-statements*
   - [ ] Optimizations
-    - [ ] Do not generate code for statements after `return`
+    - [x] Do not generate code for statements after `return`
     - [ ] Do not generate code for statements after `break` or `continue`
     - [ ] Do not generate code for unused variables*
     - [ ] Do not generate code for conditionals that are always false*  
