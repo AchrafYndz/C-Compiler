@@ -113,6 +113,8 @@ class MIPSConversionTextVisitor(ASTVisitor):
             for i, arg in enumerate(node.children):
                 if isinstance(arg, LiteralNode):
                     self.mips_interface.add_immediate_unsigned(f"a{i}", "zero", arg.value)
+                elif isinstance(arg, VariableNode):
+                    self.mips_interface.load_variable(f"a{i}", arg.name)
             self.mips_interface.jump_and_link(node.name)
         self.visitChildren(node)
 
