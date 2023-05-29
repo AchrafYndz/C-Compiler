@@ -96,7 +96,7 @@
     - [ ] Arrays
     - [ ] Conditional Statements: `if` and `else`
     - [ ] Loops: `while`, `for`, `break`, `continue`
-    - [ ] Unnamed Scopes
+    - [x] Unnamed Scopes
     - [ ] Switch Statements: `switch`, `case`, `break`, `default`*
     - [ ] Multidimensional arrays*
     - [ ] Assignments of Array rows/complete arrays in case of multidimensional arrays*
