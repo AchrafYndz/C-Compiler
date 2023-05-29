@@ -4,7 +4,8 @@ from src.Util import float_to_hex
 
 class MIPSInterface:
     def __init__(self):
-        self.data = {}
+        self.variable = {}
+        self.data = []
         self.text = []
         self.move("fp", "sp")
         self.jump_and_link("main")
@@ -97,8 +98,12 @@ class MIPSInterface:
 
     def append_string(self, string: str):
         string = string.replace('"', '')
-        label = string.replace(' ', '_') + "_" + str(len(self.data))
-        self.data[string] = label
+        label = string.replace(' ', '_') + "_" + str(len(self.variable))
+        self.variable[string] = label
+
+    def append_array(self, array_name: str, size: int):
+        instruction = f"{array_name}: .space {size * 4}"
+        self.data.append(instruction)
 
     def append_instruction(self, instr: str):
         self.text.append(instr)
@@ -162,8 +167,10 @@ class MIPSInterface:
     def write_to_file(self, filename):
         file = open(filename, "w")
         file.write(".data\n")
-        for string, label in self.data.items():
+        for string, label in self.variable.items():
             file.write(label + ": .asciiz \"" + string + '\" \n')
+        for line in self.data:
+            file.write(line + '\n')
         file.write('\n')
 
         file.write(".text\n")

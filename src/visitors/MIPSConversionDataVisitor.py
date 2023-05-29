@@ -15,3 +15,14 @@ class MIPSConversionDataVisitor(ASTVisitor):
         if node.type == TypeEnum.STRING:
             self.mips_interface.append_string(node.value)
         self.visitChildren(node)
+
+    def visitVariable_definition(self, node: VariableDefinitionNode):
+        if not node.is_array:
+            self.visitChildren(node)
+            return
+
+        if node.has_array_size:
+            size = int(node.children[0].value)
+            self.mips_interface.append_array(node.name, size)
+        else:
+            self.mips_interface.append_array(node.name, len(node.children))
