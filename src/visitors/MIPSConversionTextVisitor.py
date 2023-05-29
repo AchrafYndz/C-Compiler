@@ -250,17 +250,23 @@ class MIPSConversionTextVisitor(ASTVisitor):
         else:
             register = None
             # local variable
-            if isinstance(node.children[0], LiteralNode):
-                register = self.mips_interface.get_free_register()
-                self.mips_interface.load_immediate(register, node.children[0].value)
-            elif isinstance(node.children[0], VariableNode):
-                register = self.mips_interface.get_free_register()
-                self.mips_interface.load_variable(register, node.children[0].name)
-            elif isinstance(node.children[0], FunctionCallNode):
-                register = self.mips_interface.get_free_register()
-                self.mips_interface.move(register, "v0")
+            if node.children:
+                # defined
+                if isinstance(node.children[0], LiteralNode):
+                    register = self.mips_interface.get_free_register()
+                    self.mips_interface.load_immediate(register, node.children[0].value)
+                elif isinstance(node.children[0], VariableNode):
+                    register = self.mips_interface.get_free_register()
+                    self.mips_interface.load_variable(register, node.children[0].name)
+                elif isinstance(node.children[0], FunctionCallNode):
+                    register = self.mips_interface.get_free_register()
+                    self.mips_interface.move(register, "v0")
+                else:
+                    register = self.mips_interface.last_expression_registers.pop(0)
             else:
-                register = self.mips_interface.last_expression_registers.pop(0)
+                # undefined
+                register = self.mips_interface.get_free_register()
+                self.mips_interface.load_immediate(register, 0)
             self.mips_interface.append_variable(register, node.name)
             self.mips_interface.free_up_registers([register])
 

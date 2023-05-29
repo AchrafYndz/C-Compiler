@@ -102,8 +102,6 @@ class Scope:
         Logger.get_instance().log_error(f"Variable {name} not defined.")
 
 
-
-
 class SymbolTable:
     def __init__(self):
         self.current_scope: Scope = Scope("global")
