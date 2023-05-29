@@ -73,24 +73,35 @@ class Scope:
 
     def alter_identifier(self, name, type_=None, is_const=None, is_assigned=None, ptr_level=None, array_size=None,
                          args=None):
-        previous_variable = self.get_variable(name)
+        # search in current scope
+        for variable in reversed(self.table.values()):
+            if name == variable.name:
+                previous_variable = self.table[name]
 
-        new_type = type_ if type_ else previous_variable.type_
-        new_is_const = is_const if is_const else previous_variable.is_const
-        new_is_assigned = is_assigned if is_assigned else previous_variable.is_assigned
-        new_ptr_level = ptr_level if ptr_level else previous_variable.ptr_level
+                new_type = type_ if type_ else previous_variable.type_
+                new_is_const = is_const if is_const else previous_variable.is_const
+                new_is_assigned = is_assigned if is_assigned else previous_variable.is_assigned
+                new_ptr_level = ptr_level if ptr_level else previous_variable.ptr_level
 
-        if previous_variable.isArray():
-            new_array_size = array_size if array_size else previous_variable.array_count
-            self.table[name] = \
-                Array(name, new_type, new_is_const, new_is_assigned, new_ptr_level, new_array_size)
-        elif previous_variable.isFunction():
-            new_args = args if args else previous_variable.args
-            self.table[name] = \
-                Function(name, new_type, new_is_const, new_is_assigned, new_ptr_level, new_args)
-        else:
-            self.table[name] = \
-                Variable(name, new_type, new_is_const, new_is_assigned, new_ptr_level)
+                if previous_variable.isArray():
+                    new_array_size = array_size if array_size else previous_variable.array_count
+                    self.table[name] = \
+                        Array(name, new_type, new_is_const, new_is_assigned, new_ptr_level, new_array_size)
+                elif previous_variable.isFunction():
+                    new_args = args if args else previous_variable.args
+                    self.table[name] = \
+                        Function(name, new_type, new_is_const, new_is_assigned, new_ptr_level, new_args)
+                else:
+                    self.table[name] = \
+                        Variable(name, new_type, new_is_const, new_is_assigned, new_ptr_level)
+                    print(f"setting {name} to {new_is_assigned}")
+                return True
+        # search in parent scope too
+        if self.parent_scope:
+            return self.parent_scope.alter_identifier(name, type_, is_const, is_assigned, ptr_level, array_size, args)
+        Logger.get_instance().log_error(f"Variable {name} not defined.")
+
+
 
 
 class SymbolTable:

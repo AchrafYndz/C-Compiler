@@ -17,6 +17,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
             if isinstance(node, VariableNode):
                 var_name = node.name
                 var_obj = self.symbol_table.get_variable(var_name)
+                print(f"{var_name} is assigned?", var_obj.is_assigned)
                 if not var_obj.is_assigned:
                     Logger.get_instance().log_error(f"Undefined variable {var_name} cannot be used in {expression_type}")
 
@@ -50,6 +51,7 @@ class SemanticAnalysisVisitor(ASTVisitor):
 
         # check if variable is declared
         self.symbol_table.get_variable(node.name, expected=True)
+        print(f"setting {node.name} to assigned")
         self.symbol_table.alter_identifier(node.name, is_assigned=True)
 
         self.visitChildren(node)
