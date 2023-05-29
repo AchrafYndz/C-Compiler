@@ -90,7 +90,7 @@
     - [x] Return Keyword
     - [x] Include `stdio.h`
     - [ ] Conversions (bool <> char <> int <> float)
-    - [ ] Arguments
+    - [x] Arguments
     - [ ] Printf with text arguments e.g. `printf("Hello, %s\n", name)`;
     - [ ] Scanf
     - [ ] Arrays
