@@ -24,9 +24,19 @@ class Logger:
         handler.setFormatter(formatter)
         self.warning_logger.addHandler(handler)
 
+        self.syntax_logger = logging.getLogger("Syntax Error")
+        formatter = logging.Formatter('Syntax Error: %(message)s')
+        handler = logging.StreamHandler()
+        handler.setFormatter(formatter)
+        self.syntax_logger.addHandler(handler)
+
     def log_warning(self, message):
         self.warning_logger.warning(message)
 
     def log_error(self, message):
         self.error_logger.error(message)
+        sys.exit()
+
+    def log_syntax_error(self, message):
+        self.syntax_logger.error(message)
         sys.exit()
