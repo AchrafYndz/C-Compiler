@@ -94,7 +94,6 @@ class Scope:
                 else:
                     self.table[name] = \
                         Variable(name, new_type, new_is_const, new_is_assigned, new_ptr_level)
-                    print(f"setting {name} to {new_is_assigned}")
                 return True
         # search in parent scope too
         if self.parent_scope:

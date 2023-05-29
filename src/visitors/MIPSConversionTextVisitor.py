@@ -113,6 +113,8 @@ class MIPSConversionTextVisitor(ASTVisitor):
                         self.mips_interface.print(label, type_)
                     else:
                         self.mips_interface.print(to_print, type_, is_variable)
+        elif node.name == "scanf":
+            pass
         else:
             for i, arg in enumerate(node.children):
                 if isinstance(arg, LiteralNode):
