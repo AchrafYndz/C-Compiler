@@ -196,3 +196,7 @@ class MIPSInterface:
         self.load_immediate("v0", v0_argument)  # TODO: for now only ints
         self.syscall()
 
+    def scan(self, var_name):
+        self.load_immediate("v0", 5)
+        self.syscall()
+        self.store_in_variable(var_name, "v0")
