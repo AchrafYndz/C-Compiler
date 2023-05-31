@@ -247,32 +247,41 @@ class MIPSConversionTextVisitor(ASTVisitor):
     def visitVariable_definition(self, node: VariableDefinitionNode):
         self.visitChildren(node)
 
+        # global variable
         if self.symbol_table.current_scope.name == "1":
-            # global variable
             value_node: LiteralNode = node.children[0]
             self.mips_interface.append_global_variable(node.name, value_node.value, node.type)
-        else:
-            register = None
-            # local variable
-            if node.children:
-                # defined
-                if isinstance(node.children[0], LiteralNode):
-                    register = self.mips_interface.get_free_register()
-                    self.mips_interface.load_immediate(register, node.children[0].value)
-                elif isinstance(node.children[0], VariableNode):
-                    register = self.mips_interface.get_free_register()
-                    self.mips_interface.load_variable(register, node.children[0].name)
-                elif isinstance(node.children[0], FunctionCallNode):
-                    register = self.mips_interface.get_free_register()
-                    self.mips_interface.move(register, "v0")
-                else:
-                    register = self.mips_interface.last_expression_registers.pop(0)
-            else:
-                # undefined
+            return
+
+        # undefined array
+        if node.is_array and len(node.children) == 1:
+            return
+
+        # defined array
+        if node.is_array and len(node.children) > 1:
+            self.mips_interface.define_array(node.name, node.children)
+            return
+
+        # defined variable
+        if node.children:
+            if isinstance(node.children[0], LiteralNode):
                 register = self.mips_interface.get_free_register()
-                self.mips_interface.load_immediate(register, 0)
-            self.mips_interface.append_variable(register, node.name)
-            self.mips_interface.free_up_registers([register])
+                self.mips_interface.load_immediate(register, node.children[0].value)
+            elif isinstance(node.children[0], VariableNode):
+                register = self.mips_interface.get_free_register()
+                self.mips_interface.load_variable(register, node.children[0].name)
+            elif isinstance(node.children[0], FunctionCallNode):
+                register = self.mips_interface.get_free_register()
+                self.mips_interface.move(register, "v0")
+            else:
+                register = self.mips_interface.last_expression_registers.pop(0)
+        # undefined variable
+        else:
+            register = self.mips_interface.get_free_register()
+            self.mips_interface.load_immediate(register, 0)
+
+        self.mips_interface.append_variable(register, node.name)
+        self.mips_interface.free_up_registers([register])
 
     def visitVariable(self, node: VariableNode):
         self.visitChildren(node)

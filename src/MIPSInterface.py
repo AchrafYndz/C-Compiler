@@ -1,5 +1,6 @@
 from src.Type import TypeEnum, Type
 from src.Util import float_to_hex
+from src.ast_nodes import LiteralNode
 
 
 class MIPSInterface:
@@ -104,6 +105,25 @@ class MIPSInterface:
     def append_array(self, array_name: str, size: int):
         instruction = f"{array_name}: .space {size * 4}"
         self.data.append(instruction)
+
+    def define_array(self, array_name: str, children):
+        index_register = self.get_free_register()
+        self.load_immediate(index_register, 0)
+
+        for child in children:
+            if isinstance(child, LiteralNode):
+                free_reg = self.get_free_register()
+                self.load_immediate(free_reg, child.value)
+                self.store_in_array(array_name, free_reg, index_register)
+                self.free_up_registers([free_reg])
+            # increase the index
+            self.add_immediate_unsigned(index_register, index_register, 4)
+
+        self.free_up_registers([index_register])
+
+    def store_in_array(self, array_name: str, register: str, index_register: str):
+        self.store_word(register, array_name, index_register)
+
 
     def append_instruction(self, instr: str):
         self.text.append(instr)
