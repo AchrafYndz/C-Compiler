@@ -111,8 +111,8 @@ class MIPSInterface:
         self.load_immediate(index_register, 0)
 
         for child in children:
+            free_reg = self.get_free_register()
             if isinstance(child, LiteralNode):
-                free_reg = self.get_free_register()
                 self.load_immediate(free_reg, child.value)
                 self.store_in_array(array_name, free_reg, index_register)
                 self.free_up_registers([free_reg])
@@ -121,9 +121,11 @@ class MIPSInterface:
 
         self.free_up_registers([index_register])
 
+    def load_array_element(self, register, array_name, index_register):
+        self.load_word(register, array_name, index_register)
+
     def store_in_array(self, array_name: str, register: str, index_register: str):
         self.store_word(register, array_name, index_register)
-
 
     def append_instruction(self, instr: str):
         self.text.append(instr)
@@ -206,7 +208,10 @@ class MIPSInterface:
     def store_word_c1(self, register1, offset, register2):
         self.append_instruction(f"swc1 ${register1}, {offset}(${register2})")
 
-    def print(self, value, type_: TypeEnum=None, is_variable=False):
+    def print(self, value, type_: TypeEnum, is_variable=False, is_expression=False):
+        # TODO: remove this line
+        # if not type_:
+        #     type_ = TypeEnum.INT
         v0_arguments = {
             TypeEnum.INT: 1,
             TypeEnum.FLOAT: 2,
@@ -214,7 +219,9 @@ class MIPSInterface:
             TypeEnum.CHAR: 11
         }
         v0_argument = v0_arguments[type_]
-        if is_variable:
+        if is_expression:
+            self.move("a0", value)
+        elif is_variable:
             self.move("a0", "t0")
         elif v0_argument == 4:
             self.load_address("a0", value)

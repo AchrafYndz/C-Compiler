@@ -34,6 +34,23 @@ class MIPSConversionTextVisitor(ASTVisitor):
     def visitBinary_expression(self, node: BinaryExpressionNode):
         self.visitChildren(node)
 
+        # get element from array
+        if node.operator == "[]":
+            assert isinstance(node.children[1], LiteralNode), "variable/expr indexing not supported"
+            index = int(node.children[1].value)
+
+            index_register = self.mips_interface.get_free_register()
+            self.mips_interface.load_immediate(index_register, index*4)
+
+            result_register = self.mips_interface.get_free_register()
+            self.mips_interface.last_expression_registers.append(result_register)
+            self.mips_interface.load_array_element(result_register, node.children[0].name, index_register)
+
+            self.mips_interface.free_up_registers([index_register])
+
+            return
+
+
         type_ = get_type(node, self.symbol_table)
         type_ = TypeEnum.INT if type_ == TypeEnum.CHAR else type_
 
@@ -95,6 +112,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
                 to_print_nodes = node.children[1:]
                 for to_print_node in to_print_nodes:
                     is_variable = False
+                    is_expression = False
                     to_print = None
                     is_string = False
                     type_ = None
@@ -108,11 +126,16 @@ class MIPSConversionTextVisitor(ASTVisitor):
                         var_obj = self.symbol_table.get_variable(to_print_node.name)
                         type_ = var_obj.type_
                         is_variable = True
+                    else:
+                        type_ = TypeEnum.INT
+                        is_expression = True
+                        to_print = self.mips_interface.last_expression_registers.pop(0)
+
                     if is_string:
                         label = self.mips_interface.variable[to_print]
                         self.mips_interface.print(label, type_)
                     else:
-                        self.mips_interface.print(to_print, type_, is_variable)
+                        self.mips_interface.print(to_print, type_, is_variable, is_expression)
         elif node.name == "scanf":
             arg_node = node.children[0]
             to_write_node = node.children[1]
