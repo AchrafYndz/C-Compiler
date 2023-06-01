@@ -12,6 +12,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
         self.symbol_table = symbol_table
         self.scope_counter: int = 1
         self.mips_interface = mips_interface
+        self.current_loop_id = -1
         self.end_count = -1
 
     def visitArray_assignment(self, node: ArrayAssignmentNode):
@@ -67,8 +68,12 @@ class MIPSConversionTextVisitor(ASTVisitor):
 
     def visitBranch(self, node: BranchNode):
         self.visitChildren(node)
-        if node.sort == "return":
-            self.mips_interface.move("v0", self.mips_interface.last_expression_registers.pop(0))
+        if node.sort == "continue":
+            self.mips_interface.jump(f"loop_{self.current_loop_id}")
+        elif node.sort == "break":
+            self.mips_interface.jump(f"end_{self.current_loop_id}")
+        #elif node.sort == "return":
+        #    self.mips_interface.move("v0", self.mips_interface.last_expression_registers.pop(0))
 
     def visitConditional(self, node: ConditionalNode):
         expression_node = node.children[0]
@@ -243,7 +248,29 @@ class MIPSConversionTextVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitLoop(self, node: LoopNode):
-        self.visitChildren(node)
+        self.end_count += 1
+        self.current_loop_id = self.end_count
+
+        self.mips_interface.append_label(f"loop_{self.end_count}")
+        # body
+        loop_body = node.children[1]
+        visit_method = self.nodes_dict[type(loop_body)]
+        visit_method(loop_body)
+
+        # expr
+        expression_node = node.children[0]
+        visit_method = self.nodes_dict[type(expression_node)]
+        visit_method(expression_node)
+        expr_reg = self.mips_interface.last_expression_registers.pop()
+
+        self.mips_interface.branch_equal_l(expr_reg, "1", f"loop_{self.end_count}")
+        self.mips_interface.jump(f"end_{self.end_count}")
+
+        self.mips_interface.append_label(f"end_{self.end_count}")
+
+        self.end_count -= 1
+        self.current_loop_id = self.end_count
+
 
     def visitScope(self, node: ScopeNode):
         scope_to_enter = self.symbol_table.get_scope(str(self.scope_counter))
