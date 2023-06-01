@@ -116,7 +116,7 @@ class MIPSInterface:
     def get_label(self, string: str, defined=False):
         string = string.replace('"', '')
         label = string
-        special_chars = [' ', '$', '.', ':', '-', '/', '\\n', '!', ',', '?']
+        special_chars = [' ', '$', '.', ':', '-', '/', '\\n', '!', ',', '?', '<', '>', '(', ')']
         for char in special_chars:
             label = label.replace(char, '_')
         if defined:
