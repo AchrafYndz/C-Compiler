@@ -55,8 +55,10 @@ class PrintSplitVisitor(ASTVisitor):
             return
         self.visited.append(node.id)
 
-        if node.name != "printf":
+        if node.name not in ["printf", "scanf"]:
             return
+
+        function_name = node.name
 
         if len(node.children) == 1:
             return
@@ -76,7 +78,9 @@ class PrintSplitVisitor(ASTVisitor):
                     other_child
                 )
                 count += 1
-            new_print = FunctionCallNode("printf", node.parent, segment_children)
+                new_print = FunctionCallNode(function_name, node.parent, segment_children)
+            else:
+                new_print = FunctionCallNode("printf", node.parent, segment_children)
             for child in segment_children:
                 child.parent = new_print
 
