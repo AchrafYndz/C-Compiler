@@ -39,20 +39,23 @@ class MIPSConversionTextVisitor(ASTVisitor):
 
         # get element from array
         if node.operator == "[]":
-            assert isinstance(node.children[1], LiteralNode), "variable/expr indexing not supported"
-            index = int(node.children[1].value)
-
-            index_register = self.mips_interface.get_free_register()
-            self.mips_interface.load_immediate(index_register, index*4)
-
+            if isinstance(node.children[1], LiteralNode):
+                index = int(node.children[1].value)
+                index_register = self.mips_interface.get_free_register()
+                self.mips_interface.load_immediate(index_register, index*4)
+            elif isinstance(node.children[1], VariableNode):
+                index_register = self.mips_interface.get_free_register()
+                self.mips_interface.load_variable(index_register, node.children[1].name)
+                self.mips_interface.multiply_immediate(index_register, index_register, 4)
+            # expression
+            else:
+                index_register = self.mips_interface.last_expression_registers.pop(0)
+                self.mips_interface.multiply_immediate(index_register, index_register, 4)
             result_register = self.mips_interface.get_free_register()
             self.mips_interface.last_expression_registers.append(result_register)
             self.mips_interface.load_array_element(result_register, node.children[0].name, index_register)
-
             self.mips_interface.free_up_registers([index_register])
-
             return
-
 
         type_ = get_type(node, self.symbol_table)
         type_ = TypeEnum.INT if type_ == TypeEnum.CHAR else type_
@@ -168,8 +171,8 @@ class MIPSConversionTextVisitor(ASTVisitor):
         self.visitChildren(node)
 
         if node.name == "printf":
+            # printing a string
             if len(node.children) == 1:
-                # must be a string
                 to_print_node = node.children[0]
                 to_print = to_print_node.value.replace('"', "")
                 label = self.mips_interface.variable[to_print]

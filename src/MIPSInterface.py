@@ -61,6 +61,12 @@ class MIPSInterface:
         operation = "mul" if not is_float else "mul.s"
         self.append_instruction(f"{operation} ${register}, ${argument1}, ${argument2}")
 
+    def multiply_immediate(self, register, argument1, argument2, is_float=False):
+        help_register = self.get_free_register()
+        self.load_immediate(help_register, argument2)
+        self.multiply(register, argument1, help_register)
+        self.free_up_registers([help_register])
+
     def divide(self, register, argument1, argument2, is_float=False):
         operation = "div" if not is_float else "div.s"
         self.append_instruction(f"{operation} ${register}, ${argument1}, ${argument2}")
@@ -89,6 +95,7 @@ class MIPSInterface:
 
     def branch_equal(self, register, argument1, argument2, is_float=False):
         self.append_instruction(f"beq ${register}, {argument1}, {argument2}")
+
     def logical_and(self, register, argument1, argument2, is_float=False):
         self.append_instruction(f"and ${register}, ${argument1}, ${argument2}")
 
