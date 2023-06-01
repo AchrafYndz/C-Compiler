@@ -1,3 +1,4 @@
+from src.MIPSInterface import MIPSInterface
 from src.MIPSUtil import INSTRUCTIONS
 from src.SymbolTable import SymbolTable
 from src.Util import get_type
@@ -11,6 +12,8 @@ class MIPSConversionTextVisitor(ASTVisitor):
         self.symbol_table = symbol_table
         self.scope_counter: int = 1
         self.mips_interface = mips_interface
+        self.current_loop_id = -1
+        self.end_count = -1
 
     def visitArray_assignment(self, node: ArrayAssignmentNode):
         self.visitChildren(node)
@@ -82,11 +85,75 @@ class MIPSConversionTextVisitor(ASTVisitor):
 
     def visitBranch(self, node: BranchNode):
         self.visitChildren(node)
-        if node.sort == "return":
-            self.mips_interface.move("v0", self.mips_interface.last_expression_registers.pop(0))
+        if node.sort == "continue":
+            self.mips_interface.jump(f"loop_{self.current_loop_id}")
+        elif node.sort == "break":
+            self.mips_interface.jump(f"end_{self.current_loop_id}")
+        #elif node.sort == "return":
+        #    self.mips_interface.move("v0", self.mips_interface.last_expression_registers.pop(0))
 
     def visitConditional(self, node: ConditionalNode):
-        self.visitChildren(node)
+        expression_node = node.children[0]
+        visit_method = self.nodes_dict[type(expression_node)]
+        visit_method(expression_node)
+
+        has_else = node.has_else
+
+        self.end_count += 1
+
+        if isinstance(node.children[0], LiteralNode) and \
+           node.children[0].value == "1":
+                self.mips_interface.jump_and_link(f"if_{self.end_count}")
+                # if
+                self.mips_interface.append_label(f"if_{self.end_count}")
+                if_body = node.children[1]
+                visit_method = self.nodes_dict[type(if_body)]
+                visit_method(if_body)
+                self.mips_interface.jump(f"end_{self.end_count}")
+        elif isinstance(node.children[0], LiteralNode) and \
+           node.children[0].value == "0":
+            pass
+            if has_else:
+                self.mips_interface.jump_and_link(f"else_{self.end_count}")
+                # else
+                self.mips_interface.append_label(f"else_{self.end_count}")
+                else_body = node.children[2]
+                visit_method = self.nodes_dict[type(else_body)]
+                visit_method(else_body)
+                self.mips_interface.jump(f"end_{self.end_count}")
+            else:
+                self.mips_interface.jump_and_link(f"end_label_{self.end_count}")
+        else:
+            e_reg = self.mips_interface.last_expression_registers.pop(0)
+            if not has_else:
+                self.mips_interface.branch_equal(e_reg, "1", f"if_{self.end_count}")
+                self.mips_interface.branch_equal(e_reg, "0", f"end_{self.end_count}")
+                # if
+                self.mips_interface.append_label(f"if_{self.end_count}")
+                if_body = node.children[1]
+                visit_method = self.nodes_dict[type(if_body)]
+                visit_method(if_body)
+                self.mips_interface.jump(f"end_{self.end_count}")
+            else:
+                self.mips_interface.branch_equal(e_reg, "1", f"if_{self.end_count}")
+                self.mips_interface.branch_equal(e_reg, "0", f"else_{self.end_count}")
+                # if
+                self.mips_interface.append_label(f"if_{self.end_count}")
+                if_body = node.children[1]
+                visit_method = self.nodes_dict[type(if_body)]
+                visit_method(if_body)
+                self.mips_interface.jump(f"end_{self.end_count}")
+
+                #else
+                self.mips_interface.append_label(f"else_{self.end_count}")
+                else_body = node.children[2]
+                visit_method = self.nodes_dict[type(else_body)]
+                visit_method(else_body)
+                self.mips_interface.jump(f"end_{self.end_count}")
+
+        self.mips_interface.append_label(f"end_{self.end_count}")
+
+        self.end_count -= 1
 
     def visitDeclaration(self, node: DeclarationNode):
         self.visitChildren(node)
@@ -204,7 +271,29 @@ class MIPSConversionTextVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitLoop(self, node: LoopNode):
-        self.visitChildren(node)
+        self.end_count += 1
+        self.current_loop_id = self.end_count
+
+        self.mips_interface.append_label(f"loop_{self.end_count}")
+        # body
+        loop_body = node.children[1]
+        visit_method = self.nodes_dict[type(loop_body)]
+        visit_method(loop_body)
+
+        # expr
+        expression_node = node.children[0]
+        visit_method = self.nodes_dict[type(expression_node)]
+        visit_method(expression_node)
+        expr_reg = self.mips_interface.last_expression_registers.pop()
+
+        self.mips_interface.branch_equal(expr_reg, "1", f"loop_{self.end_count}")
+        self.mips_interface.jump(f"end_{self.end_count}")
+
+        self.mips_interface.append_label(f"end_{self.end_count}")
+
+        self.end_count -= 1
+        self.current_loop_id = self.end_count
+
 
     def visitScope(self, node: ScopeNode):
         scope_to_enter = self.symbol_table.get_scope(str(self.scope_counter))
@@ -213,7 +302,6 @@ class MIPSConversionTextVisitor(ASTVisitor):
         self.symbol_table.enter_scope(scope_to_enter)
         self.visitChildren(node)
         self.symbol_table.leave_scope()
-
     def visitType_declaration(self, node: TypeDeclarationNode):
         self.visitChildren(node)
 

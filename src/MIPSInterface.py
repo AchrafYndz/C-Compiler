@@ -87,6 +87,8 @@ class MIPSInterface:
     def not_equal(self, register, argument1, argument2, is_float=False):
         self.append_instruction(f"sne ${register}, ${argument1}, ${argument2}")
 
+    def branch_equal(self, register, argument1, argument2, is_float=False):
+        self.append_instruction(f"beq ${register}, {argument1}, {argument2}")
     def logical_and(self, register, argument1, argument2, is_float=False):
         self.append_instruction(f"and ${register}, ${argument1}, ${argument2}")
 

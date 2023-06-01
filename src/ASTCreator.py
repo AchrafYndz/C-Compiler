@@ -208,7 +208,7 @@ class ASTCreator(CListener):
         self.current_node = self.current_node.parent
 
     def enterConditional(self, ctx: CParser.ConditionalContext):
-        node = ConditionalNode()
+        node = ConditionalNode(has_else=not(ctx.ELSE() is None))
         self.current_node.addChild(node)
         self.current_node = node
 
