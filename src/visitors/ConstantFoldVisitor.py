@@ -133,8 +133,6 @@ class ConstantFoldVisitor(ASTVisitor):
         type_ = get_type(node, self.symbol_table)
         self.replace_child(node, operation, result, type_)
 
-
-
     def visitFunction_call(self, node: FunctionCallNode):
         func_name = node.name
         if func_name != "printf":

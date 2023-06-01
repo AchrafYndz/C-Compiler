@@ -10,6 +10,7 @@ from src.ASTCreator import ASTCreator
 from src.AST import AST
 from src.ASTErrorListener import ASTErrorListener
 from src.visitors.OptimizationVisitor import OptimizationVisitor
+from src.visitors.PrintSplitVisitor import PrintSplitVisitor
 
 from src.visitors.SemanticAnalysisVisitor import SemanticAnalysisVisitor
 from src.visitors.ConstantFoldVisitor import ConstantFoldVisitor
@@ -38,6 +39,10 @@ def run(input_file, const_folding, optimize, run_mips):
     # translate for to while
     translator = TranslationVisitor()
     translator.visitScope(ast.root)
+
+    # split printf formatting
+    print_splitter = PrintSplitVisitor()
+    print_splitter.visitScope(ast.root)
 
     # optimize
     if optimize:
