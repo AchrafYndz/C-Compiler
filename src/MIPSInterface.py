@@ -1,6 +1,6 @@
 from src.Type import TypeEnum, Type
 from src.Util import float_to_hex
-from src.ast_nodes import LiteralNode
+from src.ast_nodes import LiteralNode, VariableNode
 
 
 class MIPSInterface:
@@ -132,6 +132,15 @@ class MIPSInterface:
         for child in children:
             if isinstance(child, LiteralNode):
                 self.assign_array_element_immediate(child.value, array_name, index_register)
+            elif isinstance(child, VariableNode):
+                value_register = self.get_free_register()
+                self.load_variable(value_register, child.name)
+                self.assign_array_element(value_register, array_name, index_register)
+                self.free_up_registers([value_register])
+            else:
+                value_register = self.last_expression_registers.pop(0)
+                self.assign_array_element(value_register, array_name, index_register)
+                self.free_up_registers([value_register])
             # increase the index
             self.add_immediate_unsigned(index_register, index_register, 4)
 
