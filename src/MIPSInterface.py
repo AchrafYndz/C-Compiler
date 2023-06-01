@@ -21,6 +21,7 @@ class MIPSInterface:
         self.last_expression_registers = []
 
     def get_free_register(self):
+        assert len(self.free_registers) > 0, "no more free registers"
         return self.free_registers.pop(0)
 
     def free_up_registers(self, registers):
@@ -115,16 +116,22 @@ class MIPSInterface:
         instruction = f"{array_name}: .space {size * 4}"
         self.data.append(instruction)
 
+    def assign_array_element_immediate(self, value, array_name, index_register):
+        free_reg = self.get_free_register()
+        self.load_immediate(free_reg, value)
+        self.assign_array_element(free_reg, array_name, index_register)
+        self.free_up_registers([free_reg])
+
+    def assign_array_element(self, register, array_name, index_register):
+        self.store_in_array(array_name, register, index_register)
+
     def define_array(self, array_name: str, children):
         index_register = self.get_free_register()
         self.load_immediate(index_register, 0)
 
         for child in children:
-            free_reg = self.get_free_register()
             if isinstance(child, LiteralNode):
-                self.load_immediate(free_reg, child.value)
-                self.store_in_array(array_name, free_reg, index_register)
-                self.free_up_registers([free_reg])
+                self.assign_array_element_immediate(child.value, array_name, index_register)
             # increase the index
             self.add_immediate_unsigned(index_register, index_register, 4)
 

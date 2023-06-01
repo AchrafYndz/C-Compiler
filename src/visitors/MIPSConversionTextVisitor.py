@@ -18,8 +18,29 @@ class MIPSConversionTextVisitor(ASTVisitor):
     def visitArray_assignment(self, node: ArrayAssignmentNode):
         self.visitChildren(node)
 
+        array_name = node.name
+        index_register = self.mips_interface.get_free_register()
+        self.mips_interface.load_immediate(index_register, node.index)
+        self.mips_interface.multiply_immediate(index_register, index_register, 4)
+
+        if isinstance(node.children[0], LiteralNode):
+            value = node.children[0].value
+            self.mips_interface.assign_array_element_immediate(value, array_name, index_register)
+        elif isinstance(node.children[0], VariableNode):
+            value_register = self.mips_interface.get_free_register()
+            self.mips_interface.load_variable(value_register, node.children[0].name)
+            self.mips_interface.assign_array_element(value_register, array_name, index_register)
+            self.mips_interface.free_up_registers([value_register])
+        else:
+            value_register = self.mips_interface.last_expression_registers.pop(0)
+            self.mips_interface.assign_array_element(value_register, array_name, index_register)
+            self.mips_interface.free_up_registers([value_register])
+        self.mips_interface.free_up_registers([index_register])
+
     def visitAssignment(self, node: AssignmentNode):
         self.visitChildren(node)
+
+        # defined
         if len(node.children) == 1:
             if isinstance(node.children[0], LiteralNode):
                 register = "t0"
