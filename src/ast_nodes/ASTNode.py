@@ -16,7 +16,6 @@ class ASTNode:
         return "Template Node"
 
     def visualize(self, filename=None, file=None):
-        print(self.getLabel())
         if self.parent:
             file.write("subgraph { " + str(self.parent.id) + " [label=\"" + self.parent.getLabel().replace('"', '\\"') + "\"];} "
                         "-> subgraph {" + str(self.id) + " [label=\"" + self.getLabel().replace('"', '\\"') + "\"];};\n")

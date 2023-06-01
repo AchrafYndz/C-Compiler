@@ -108,9 +108,21 @@ class MIPSInterface:
         self.append_instruction(f"xori ${register}, ${register}, 1")
 
     def append_string(self, string: str):
-        string = string.replace('"', '')
-        label = string.replace(' ', '_') + "_" + str(len(self.variable))
+        if "%" in string:
+            return
+        label, string = self.get_label(string)
         self.variable[string] = label
+
+    def get_label(self, string: str, defined=False):
+        string = string.replace('"', '')
+        label = string
+        special_chars = [' ', '$', '.', ':', '-', '/', '\\n', '!', ',', '?']
+        for char in special_chars:
+            label = label.replace(char, '_')
+        if defined:
+            return self.variable[string], string
+        label = label + "_" + str(len(self.variable))
+        return label, string
 
     def append_array(self, array_name: str, size: int):
         instruction = f"{array_name}: .space {size * 4}"

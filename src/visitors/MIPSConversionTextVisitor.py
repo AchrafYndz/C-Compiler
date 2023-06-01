@@ -196,7 +196,8 @@ class MIPSConversionTextVisitor(ASTVisitor):
             if len(node.children) == 1:
                 to_print_node = node.children[0]
                 to_print = to_print_node.value.replace('"', "")
-                label = self.mips_interface.variable[to_print]
+                # label = self.mips_interface.variable[to_print]
+                label, _ = self.mips_interface.get_label(to_print, defined=True)
                 self.mips_interface.print(label, to_print_node.type)
             else:
                 # can be either a variable or a literal
