@@ -263,7 +263,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
         visit_method(expression_node)
         expr_reg = self.mips_interface.last_expression_registers.pop()
 
-        self.mips_interface.branch_equal_l(expr_reg, "1", f"loop_{self.end_count}")
+        self.mips_interface.branch_equal(expr_reg, "1", f"loop_{self.end_count}")
         self.mips_interface.jump(f"end_{self.end_count}")
 
         self.mips_interface.append_label(f"end_{self.end_count}")
