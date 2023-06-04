@@ -1,7 +1,7 @@
 from src.MIPSInterface import MIPSInterface
 from src.MIPSUtil import INSTRUCTIONS
 from src.SymbolTable import SymbolTable
-from src.Util import get_type
+from src.Util import get_type, cast_to_type
 from src.ast_nodes import *
 from src.visitors.ASTVisitor import ASTVisitor
 
@@ -44,7 +44,8 @@ class MIPSConversionTextVisitor(ASTVisitor):
         if len(node.children) == 1:
             if isinstance(node.children[0], LiteralNode):
                 register = "t0"
-                self.mips_interface.load_immediate("t0", node.children[0].value)
+                l_type = self.symbol_table.get_variable(node.name).type_
+                self.mips_interface.load_immediate("t0", cast_to_type(l_type, node.children[0].value))
             elif isinstance(node.children[0], VariableNode):
                 register = "t0"
                 self.mips_interface.load_variable("t0", node.children[0].name)
@@ -90,7 +91,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
                 operators.append(free_register)
             elif isinstance(child_node, LiteralNode):
                 free_register = self.mips_interface.get_free_register()
-                self.mips_interface.load_immediate(free_register, child_node.value)
+                self.mips_interface.load_immediate(free_register, cast_to_type(type_, child_node.value))
                 operators.append(free_register)
             else:
                 expression_register = self.mips_interface.last_expression_registers.pop(0)
@@ -228,6 +229,28 @@ class MIPSConversionTextVisitor(ASTVisitor):
                         self.mips_interface.print(label, type_)
                     else:
                         self.mips_interface.print(to_print, type_, is_variable, is_expression)
+                        """
+                        types = {
+                            "%i": TypeEnum.INT,
+                            "%f": TypeEnum.FLOAT,
+                            "%d": TypeEnum.FLOAT,
+                            "%c": TypeEnum.CHAR,
+                            "%s": TypeEnum.STRING
+                        }
+                        to_cast_type = types[node.children[0].value]
+                        register = self.mips_interface.get_free_register()
+                        if to_cast_type == TypeEnum.FLOAT:
+                            '''if not is_variable:
+                                self.mips_interface.load_immediate("t0", cast_to_type(to_cast_type, to_print))
+                            '''
+                            self.mips_interface.append_instruction(f"mtc1 $t0, $f0")
+                            self.mips_interface.append_instruction(f"swc1 $f0, 0($sp)")
+                            self.mips_interface.append_instruction(f"mov.s $f12, $f0")
+                        if not is_variable:
+                            self.mips_interface.print(cast_to_type(to_cast_type, to_print), to_cast_type, is_variable, is_expression)
+                        else:
+                            self.mips_interface.print(to_print, to_cast_type, is_variable, is_expression)
+                        """
         elif node.name == "scanf":
             arg_node = node.children[0]
             to_write_node = node.children[1]
@@ -402,7 +425,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
         if node.children:
             if isinstance(node.children[0], LiteralNode):
                 register = self.mips_interface.get_free_register()
-                self.mips_interface.load_immediate(register, node.children[0].value)
+                self.mips_interface.load_immediate(register, cast_to_type(node.type.type, node.children[0].value))
             elif isinstance(node.children[0], VariableNode):
                 register = self.mips_interface.get_free_register()
                 self.mips_interface.load_variable(register, node.children[0].name)

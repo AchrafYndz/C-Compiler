@@ -93,16 +93,21 @@ def get_literal_type(value):
 
 
 def cast_to_type(type_, value):
-    if type_ == TypeEnum.FLOAT:
-        return float(value)
-    elif type_ == TypeEnum.INT:
-        return int(round(float(value)))
-    elif type_ == TypeEnum.CHAR:
-        return int(round(float(value))) % 256
-
-    return value
+    if value:
+        if type_ == TypeEnum.FLOAT:
+            return float_to_hex(float(value))
+        elif type_ == TypeEnum.INT:
+            return int(round(float(value)))
+        elif type_ == TypeEnum.CHAR:
+            return int(round(float(value))) % 256
+        return value
 
 
 # https://stackoverflow.com/questions/23624212/how-to-convert-a-float-into-hex
 def float_to_hex(f):
     return hex(struct.unpack('<I', struct.pack('<f', f))[0])
+
+
+def cast_register_to_float(register, mi):
+    mi.append_instruction(f"mtc1 $t0, $f0")
+    mi.append_instruction(f"cvt.s.w $t0, $f0")
