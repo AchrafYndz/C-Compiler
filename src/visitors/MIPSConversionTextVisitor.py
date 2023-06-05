@@ -1,9 +1,10 @@
 from src.MIPSInterface import MIPSInterface
 from src.MIPSUtil import INSTRUCTIONS
 from src.SymbolTable import SymbolTable
-from src.Util import get_type, cast_to_type
+from src.Util import get_type, cast_to_type, extract_leaves
 from src.ast_nodes import *
 from src.visitors.ASTVisitor import ASTVisitor
+import uuid
 
 
 class MIPSConversionTextVisitor(ASTVisitor):
@@ -124,61 +125,59 @@ class MIPSConversionTextVisitor(ASTVisitor):
 
         has_else = node.has_else
 
-        self.end_count += 1
+        index = uuid.uuid4().hex
 
         if isinstance(node.children[0], LiteralNode) and \
            node.children[0].value == "1":
-                self.mips_interface.jump_and_link(f"if_{self.end_count}")
+                self.mips_interface.jump_and_link(f"if_{index}")
                 # if
-                self.mips_interface.append_label(f"if_{self.end_count}")
+                self.mips_interface.append_label(f"if_{index}")
                 if_body = node.children[1]
                 visit_method = self.nodes_dict[type(if_body)]
                 visit_method(if_body)
-                self.mips_interface.jump(f"end_{self.end_count}")
+                self.mips_interface.jump(f"end_{index}")
         elif isinstance(node.children[0], LiteralNode) and \
            node.children[0].value == "0":
             pass
             if has_else:
-                self.mips_interface.jump_and_link(f"else_{self.end_count}")
+                self.mips_interface.jump_and_link(f"else_{index}")
                 # else
-                self.mips_interface.append_label(f"else_{self.end_count}")
+                self.mips_interface.append_label(f"else_{index}")
                 else_body = node.children[2]
                 visit_method = self.nodes_dict[type(else_body)]
                 visit_method(else_body)
-                self.mips_interface.jump(f"end_{self.end_count}")
+                self.mips_interface.jump(f"end_{index}")
             else:
-                self.mips_interface.jump_and_link(f"end_label_{self.end_count}")
+                self.mips_interface.jump_and_link(f"end_{index}")
         else:
             e_reg = self.mips_interface.last_expression_registers.pop(0)
             if not has_else:
-                self.mips_interface.branch_equal(e_reg, "1", f"if_{self.end_count}")
-                self.mips_interface.branch_equal(e_reg, "0", f"end_{self.end_count}")
+                self.mips_interface.branch_equal(e_reg, "1", f"if_{index}")
+                self.mips_interface.branch_equal(e_reg, "0", f"end_{index}")
                 # if
-                self.mips_interface.append_label(f"if_{self.end_count}")
+                self.mips_interface.append_label(f"if_{index}")
                 if_body = node.children[1]
                 visit_method = self.nodes_dict[type(if_body)]
                 visit_method(if_body)
-                self.mips_interface.jump(f"end_{self.end_count}")
+                self.mips_interface.jump(f"end_{index}")
             else:
-                self.mips_interface.branch_equal(e_reg, "1", f"if_{self.end_count}")
-                self.mips_interface.branch_equal(e_reg, "0", f"else_{self.end_count}")
+                self.mips_interface.branch_equal(e_reg, "1", f"if_{index}")
+                self.mips_interface.branch_equal(e_reg, "0", f"else_{index}")
                 # if
-                self.mips_interface.append_label(f"if_{self.end_count}")
+                self.mips_interface.append_label(f"if_{index}")
                 if_body = node.children[1]
                 visit_method = self.nodes_dict[type(if_body)]
                 visit_method(if_body)
-                self.mips_interface.jump(f"end_{self.end_count}")
+                self.mips_interface.jump(f"end_{index}")
 
                 #else
-                self.mips_interface.append_label(f"else_{self.end_count}")
+                self.mips_interface.append_label(f"else_{index}")
                 else_body = node.children[2]
                 visit_method = self.nodes_dict[type(else_body)]
                 visit_method(else_body)
-                self.mips_interface.jump(f"end_{self.end_count}")
+                self.mips_interface.jump(f"end_{index}")
 
-        self.mips_interface.append_label(f"end_{self.end_count}")
-
-        self.end_count -= 1
+        self.mips_interface.append_label(f"end_{index}")
 
     def visitDeclaration(self, node: DeclarationNode):
         self.visitChildren(node)
@@ -279,6 +278,15 @@ class MIPSConversionTextVisitor(ASTVisitor):
 
         # start
         variable_node = node.children[1]
+        has_body = False
+
+        for child in node.children:
+            if isinstance(child, ScopeNode):
+                has_body = True
+
+        # overslaan van lege functies - handig voor forward declr
+        if not has_body:
+            return
 
         self.mips_interface.enter_function(variable_node.name)
 

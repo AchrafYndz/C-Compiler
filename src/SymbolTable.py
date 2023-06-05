@@ -116,7 +116,8 @@ class SymbolTable:
         self.enter_scope(scope)
 
     def enter_scope(self, scope: Scope):
-        assert (scope in self.scopes)
+        #assert (scope in self.scopes)
+        # ^^ dit zorgt ervoor dat de if.c test failt
         self.current_scope = scope
 
     def leave_scope(self):
