@@ -53,6 +53,7 @@ def test_valid():
     for filename in os.listdir(directory):
         if filename.endswith('.c'):
             filepath = os.path.join(directory, filename)
+            base_name = filename[:-2]
             print(f"Now handling {filepath}, which is test {counter}")
             counter += 1
             input_stream = FileStream(filepath)
@@ -88,6 +89,17 @@ def test_valid():
 
             # generate DOT file
             ast.visualize(filename="valid")
+
+            # generate mips code
+            mips_converter = MIPSConverter(
+                symbol_table=ast_semantic_visitor.symbol_table,
+            )
+            mips_converter.convert(ast.root, base_name)
+
+            subprocess.call(
+                f"java -jar bin/Mars4_5.jar tests/output/mips/{base_name}.asm > tests/output/mips/{base_name}.out",
+                shell=True
+            )
 
 
 def test_mips():

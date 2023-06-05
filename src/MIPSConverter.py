@@ -16,7 +16,7 @@ class MIPSConverter:
             symbol_table=symbol_table
         )
 
-    def convert(self, root):
+    def convert(self, root, base_name):
         self.mips_conversion_data_visitor.visitScope(root)
         self.mips_conversion_text_visitor.visitScope(root)
-        self.mips_interface.write_to_file("tests/output/mips/test.asm")
+        self.mips_interface.write_to_file(f"tests/output/mips/{base_name}.asm")
