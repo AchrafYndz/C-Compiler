@@ -96,6 +96,12 @@ class MIPSConversionTextVisitor(ASTVisitor):
                 operators.append(free_register)
             elif isinstance(child_node, FunctionCallNode):
                 operators.append("v0")
+            elif isinstance(child_node, UnaryExpressionNode) and child_node.operator in ["++", "--"]:
+                var_node = child_node.children[0]
+
+                free_register = self.mips_interface.get_free_register()
+                self.mips_interface.load_variable(free_register, var_node.name)
+                operators.append(free_register)
             else:
                 expression_register = self.mips_interface.last_expression_registers.pop(0)
                 operators.append(expression_register)
@@ -426,7 +432,6 @@ class MIPSConversionTextVisitor(ASTVisitor):
                     register,
                     "1"
                 )
-                self.mips_interface.last_expression_registers.append(result_register)
                 self.mips_interface.store_in_variable(child_node.name, result_register)
                 self.mips_interface.last_expression_registers.pop(0)
             self.mips_interface.free_up_registers([register])
