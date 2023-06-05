@@ -67,7 +67,6 @@ class PrintSplitVisitor(ASTVisitor):
         format_string = format_node.value
 
         segments = self.parse_format_string(format_string)
-        print(segments)
 
         new_prints = []
         count = 1

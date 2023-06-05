@@ -199,61 +199,80 @@ class MIPSConversionTextVisitor(ASTVisitor):
                 # label = self.mips_interface.variable[to_print]
                 label, _ = self.mips_interface.get_label(to_print, defined=True)
                 self.mips_interface.print(label, to_print_node.type)
-            else:
-                # can be either a variable or a literal
-                to_print_nodes = node.children[1:]
-                for to_print_node in to_print_nodes:
-                    is_variable = False
-                    is_expression = False
-                    to_print = None
-                    is_string = False
-                    type_ = None
+                return
 
-                    if isinstance(to_print_node, LiteralNode):
-                        is_string = (to_print_node.type == TypeEnum.STRING)
-                        to_print = to_print_node.value.replace('"', "")
-                        type_ = to_print_node.type
-                    elif isinstance(to_print_node, VariableNode):
-                        self.mips_interface.load_variable("t0", to_print_node.name)
-                        var_obj = self.symbol_table.get_variable(to_print_node.name)
-                        type_ = var_obj.type_
-                        is_variable = True
-                    else:
-                        type_ = TypeEnum.INT
-                        is_expression = True
-                        to_print = self.mips_interface.last_expression_registers.pop(0)
+            # can be either a variable or a literal
+            to_print_nodes = node.children[1:]
+            for to_print_node in to_print_nodes:
+                is_variable = False
+                is_expression = False
+                to_print = None
+                is_string = False
+                type_ = None
 
-                    if is_string:
-                        label = self.mips_interface.variable[to_print]
-                        self.mips_interface.print(label, type_)
-                    else:
-                        self.mips_interface.print(to_print, type_, is_variable, is_expression)
-                        """
-                        types = {
-                            "%i": TypeEnum.INT,
-                            "%f": TypeEnum.FLOAT,
-                            "%d": TypeEnum.FLOAT,
-                            "%c": TypeEnum.CHAR,
-                            "%s": TypeEnum.STRING
-                        }
-                        to_cast_type = types[node.children[0].value]
+                if isinstance(to_print_node, LiteralNode):
+                    is_string = (to_print_node.type == TypeEnum.STRING)
+                    to_print = to_print_node.value.replace('"', "")
+                    type_ = to_print_node.type
+                elif isinstance(to_print_node, VariableNode):
+                    var_obj = self.symbol_table.get_variable(to_print_node.name)
+                    type_ = var_obj.type_
+                    if var_obj.isArray():
+                        index_register = self.mips_interface.get_free_register()
+                        self.mips_interface.load_immediate(index_register, 0)
                         register = self.mips_interface.get_free_register()
-                        if to_cast_type == TypeEnum.FLOAT:
-                            '''if not is_variable:
-                                self.mips_interface.load_immediate("t0", cast_to_type(to_cast_type, to_print))
-                            '''
-                            self.mips_interface.append_instruction(f"mtc1 $t0, $f0")
-                            self.mips_interface.append_instruction(f"swc1 $f0, 0($sp)")
-                            self.mips_interface.append_instruction(f"mov.s $f12, $f0")
-                        if not is_variable:
-                            self.mips_interface.print(cast_to_type(to_cast_type, to_print), to_cast_type, is_variable, is_expression)
-                        else:
-                            self.mips_interface.print(to_print, to_cast_type, is_variable, is_expression)
-                        """
+                        for i in range(var_obj.array_count):
+                            self.mips_interface.load_array_element(register, var_obj.name, index_register)
+                            self.mips_interface.print(register, type_=type_, is_expression=True)
+                            # increase the index
+                            self.mips_interface.add_immediate_unsigned(index_register, index_register, 4)
+                        self.mips_interface.free_up_registers([index_register, register])
+                        return
+                    else:
+                        self.mips_interface.load_variable("t0", to_print_node.name)
+                        is_variable = True
+                else:
+                    type_ = TypeEnum.INT
+                    is_expression = True
+                    to_print = self.mips_interface.last_expression_registers.pop(0)
+
+                if is_string:
+                    label = self.mips_interface.variable[to_print]
+                    self.mips_interface.print(label, type_)
+                else:
+                    self.mips_interface.print(to_print, type_, is_variable, is_expression)
+                    """
+                    types = {
+                        "%i": TypeEnum.INT,
+                        "%f": TypeEnum.FLOAT,
+                        "%d": TypeEnum.FLOAT,
+                        "%c": TypeEnum.CHAR,
+                        "%s": TypeEnum.STRING
+                    }
+                    to_cast_type = types[node.children[0].value]
+                    register = self.mips_interface.get_free_register()
+                    if to_cast_type == TypeEnum.FLOAT:
+                        '''if not is_variable:
+                            self.mips_interface.load_immediate("t0", cast_to_type(to_cast_type, to_print))
+                        '''
+                        self.mips_interface.append_instruction(f"mtc1 $t0, $f0")
+                        self.mips_interface.append_instruction(f"swc1 $f0, 0($sp)")
+                        self.mips_interface.append_instruction(f"mov.s $f12, $f0")
+                    if not is_variable:
+                        self.mips_interface.print(cast_to_type(to_cast_type, to_print), to_cast_type, is_variable, is_expression)
+                    else:
+                        self.mips_interface.print(to_print, to_cast_type, is_variable, is_expression)
+                    """
+
         elif node.name == "scanf":
+            assert isinstance(node.children[1], UnaryExpressionNode), "scanf expected unary expression"
             arg_node = node.children[0]
-            to_write_node = node.children[1]
-            self.mips_interface.scan(to_write_node.name)
+            to_write_node = node.children[1].children[0]
+            var_obj = self.symbol_table.get_variable(to_write_node.name)
+            if var_obj.isArray():
+                pass
+            else:
+                self.mips_interface.scan(to_write_node.name)
         else:
             for i, arg in enumerate(node.children):
                 if isinstance(arg, LiteralNode):
@@ -350,7 +369,6 @@ class MIPSConversionTextVisitor(ASTVisitor):
         self.end_count -= 1
         self.current_loop_id = self.end_count
 
-
     def visitScope(self, node: ScopeNode):
         scope_to_enter = self.symbol_table.get_scope(str(self.scope_counter))
         self.scope_counter += 1
@@ -358,6 +376,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
         self.symbol_table.enter_scope(scope_to_enter)
         self.visitChildren(node)
         self.symbol_table.leave_scope()
+
     def visitType_declaration(self, node: TypeDeclarationNode):
         self.visitChildren(node)
 
@@ -398,8 +417,12 @@ class MIPSConversionTextVisitor(ASTVisitor):
 
         elif node.operator == "&":
             register = self.mips_interface.get_free_register()
-            offset = self.mips_interface.local_variables[child_node.name]
-            self.mips_interface.load_address(register, f"{offset}($sp)")
+            var_obj = self.symbol_table.get_variable(child_node.name, expected=True)
+            if var_obj.isArray():
+                self.mips_interface.scan_array(var_obj.name, var_obj.array_count, var_obj.type_)
+            else:
+                offset = self.mips_interface.local_variables[child_node.name]
+                self.mips_interface.load_address(register, f"{offset}($sp)")
             self.mips_interface.last_expression_registers.append(register)
 
         elif node.operator == "*":

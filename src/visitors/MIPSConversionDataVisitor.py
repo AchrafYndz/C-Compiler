@@ -23,6 +23,16 @@ class MIPSConversionDataVisitor(ASTVisitor):
 
         if node.has_array_size:
             size = int(node.children[0].value)
+            self.symbol_table.alter_identifier(node.name, array_size=size)
             self.mips_interface.append_array(node.name, size)
         else:
+            self.symbol_table.alter_identifier(node.name, array_size=len(node.children))
             self.mips_interface.append_array(node.name, len(node.children))
+
+    def visitScope(self, node: ScopeNode):
+        scope_to_enter = self.symbol_table.get_scope(str(self.scope_counter))
+        self.scope_counter += 1
+
+        self.symbol_table.enter_scope(scope_to_enter)
+        self.visitChildren(node)
+        self.symbol_table.leave_scope()

@@ -1,3 +1,5 @@
+import uuid
+
 from src.Type import TypeEnum, Type
 from src.Util import float_to_hex
 from src.ast_nodes import LiteralNode, VariableNode
@@ -96,6 +98,9 @@ class MIPSInterface:
 
     def branch_equal(self, register, argument1, argument2, is_float=False):
         self.append_instruction(f"beq ${register}, {argument1}, {argument2}")
+
+    def branch_not_equal(self, register, argument1, argument2, is_float=False):
+        self.append_instruction(f"bne ${register}, ${argument1}, {argument2}")
 
     def logical_and(self, register, argument1, argument2, is_float=False):
         self.append_instruction(f"and ${register}, ${argument1}, ${argument2}")
@@ -271,3 +276,25 @@ class MIPSInterface:
         self.load_immediate("v0", 5)
         self.syscall()
         self.store_in_variable(var_name, "v0")
+
+    def scan_array(self, array_name, size, type_):
+        # TODO: add to float
+        v0_arguments = {
+            TypeEnum.INT: 5,
+            TypeEnum.STRING: 12,
+            TypeEnum.CHAR: 12
+        }
+        v0_argument = v0_arguments[type_]
+        self.load_address("t0", array_name)  # Load the base address of the array
+        self.load_immediate("t1", size*4)  # Load the size of the array
+        self.add_unsigned("t2", "t0", "t1")  # Calculate the end address of the array
+
+        index = uuid.uuid4().hex
+        self.append_label(f"array_loop_{index}")  # Generate a unique label for the loop
+
+        self.load_immediate("v0", v0_argument)  # System call code for reading integer input
+        self.syscall()  # Perform the system call
+
+        self.store_word("v0", 0, "t0")  # Store the input value in the current array element
+        self.add_immediate_unsigned("t0", "t0", 4)  # Increment the array pointer
+        self.branch_not_equal("t0", "t2", f"array_loop_{index}")  # Check if the array pointer has reached the end
