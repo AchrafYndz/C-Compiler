@@ -24,10 +24,10 @@ class PrintSplitVisitor(ASTVisitor):
     def parse_format_string(format_string):
         segments = []
         current_segment = ""
-        index = 0
+        index = 1
         length = len(format_string)
 
-        while index < length:
+        while index < length - 1:
             if format_string[index] == '%':
                 if current_segment:
                     segments.append(current_segment)
@@ -67,6 +67,7 @@ class PrintSplitVisitor(ASTVisitor):
         format_string = format_node.value
 
         segments = self.parse_format_string(format_string)
+        print(segments)
 
         new_prints = []
         count = 1
