@@ -118,6 +118,8 @@ class MIPSConversionTextVisitor(ASTVisitor):
         elif node.sort == "break":
             self.mips_interface.jump(f"end_{self.current_loop_id}")
         elif node.sort == "return":
+            if not node.children:
+                return
             if isinstance(node.children[0], VariableNode):
                 value_register = self.mips_interface.get_free_register()
                 self.mips_interface.load_variable(value_register, node.children[0].name)
