@@ -67,7 +67,7 @@ def run(input_file, const_folding, optimize, run_mips):
         mips_converter = MIPSConverter(
             symbol_table=ast_semantic_visitor.symbol_table,
         )
-        mips_converter.convert(ast.root)
+        mips_converter.convert(ast.root, "test")
 
         print("----------------------------------------")
         print("Running Mips...")
