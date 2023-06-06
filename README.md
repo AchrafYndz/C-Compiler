@@ -106,4 +106,4 @@
 
 # Note:
 In case the binary operations file test fails, and you're using Pycharm:
-make sure you disable Settings > Editor > On Save > Remove trailing spaces
+make sure you disable Settings > Editor > General > On Save > Remove trailing spaces
