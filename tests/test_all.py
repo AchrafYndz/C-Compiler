@@ -1,4 +1,5 @@
 import subprocess
+from threading import Thread
 
 import pytest
 import os
@@ -12,7 +13,9 @@ from src.antlr.CLexer import CLexer
 from src.antlr.CParser import CParser
 from src.visitors.ConstantFoldVisitor import ConstantFoldVisitor
 from src.visitors.OptimizationVisitor import OptimizationVisitor
+from src.visitors.PrintSplitVisitor import PrintSplitVisitor
 from src.visitors.SemanticAnalysisVisitor import SemanticAnalysisVisitor
+from src.visitors.TranslationVisitor import TranslationVisitor
 
 
 def test_semantic_analysis():
@@ -73,13 +76,21 @@ def test_valid():
             ast_creator.enterProgram(tree)
             ast = AST(ast_creator.root)
 
-            # run semantic analysis
-            ast_semantic_visitor = SemanticAnalysisVisitor()
-            ast_semantic_visitor.visitScope(ast.root)
+            # translate for to while
+            translator = TranslationVisitor()
+            translator.visitScope(ast.root)
+
+            # split printf formatting
+            print_splitter = PrintSplitVisitor()
+            print_splitter.visitScope(ast.root)
 
             # run optimizer
             optimizer = OptimizationVisitor()
             optimizer.visitScope(ast.root)
+
+            # run semantic analysis
+            ast_semantic_visitor = SemanticAnalysisVisitor()
+            ast_semantic_visitor.visitScope(ast.root)
 
             # constant fold
             constant_fold_visitor = ConstantFoldVisitor(
@@ -108,6 +119,7 @@ def test_mips():
     for filename in os.listdir(directory):
         if filename.endswith('.c'):
             filepath = os.path.join(directory, filename)
+            base_name = filename[:-2]
             print(f"Now handling {filepath}, which is test {counter}")
             counter += 1
             input_stream = FileStream(filepath)
@@ -148,6 +160,9 @@ def test_mips():
             mips_converter = MIPSConverter(
                 symbol_table=ast_semantic_visitor.symbol_table,
             )
-            mips_converter.convert(ast.root)
-            subprocess.call(["java", "-jar", "bin/Mars4_5.jar", "tests/output/mips/test.asm"])
+            mips_converter.convert(ast.root, base_name)
 
+            subprocess.call(
+                f"java -jar bin/Mars4_5.jar tests/output/mips/{base_name}.asm > tests/output/mips/{base_name}.out",
+                shell=True
+            )
