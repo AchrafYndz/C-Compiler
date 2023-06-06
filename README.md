@@ -1,9 +1,11 @@
 # C-Compiler
 
-# Note:
+### Note:
 - In case BinaryOperations.c test fails, and you're using Pycharm:
 make sure you disable Settings > Editor > General > On Save > Remove trailing spaces
 - Python 3.10 or newer required
+
+### Checklist:
 
 *optional
 
@@ -47,6 +49,7 @@ make sure you disable Settings > Editor > General > On Save > Remove trailing sp
     - [x] Void Functions
     - [x] Arrays
     - [x] Include `stdio.h`
+    - [x] Do-while loops **
     - [ ] Multidimensional arrays*
     - [ ] Assignments of Array rows/complete arrays in case of multidimensional arrays*
     - [ ] Dynamic arrays*
@@ -55,12 +58,13 @@ make sure you disable Settings > Editor > General > On Save > Remove trailing sp
   - [x] Constant folding
   - [x] Constant Propagation
   - [x] Convert for-loops to while-loops
+  - [x] Convert do-while-loops to while-loops **
   - [ ] Convert switch statements to if-statements*
   - [x] Optimizations
     - [x] Do not generate code for statements after `return`
     - [x] Do not generate code for statements after `break` or `continue`
+    - [x] Do not generate code for conditionals that are always false*  
     - [ ] Do not generate code for unused variables*
-    - [ ] Do not generate code for conditionals that are always false*  
 
 - [x] Error Analysis
     - [x] Syntax Errors
@@ -75,7 +79,7 @@ make sure you disable Settings > Editor > General > On Save > Remove trailing sp
       - [x] Semantic Analysis visitor should support function scopes
       - [x] Consistency return statement with return type of function
       - [x] Consistency forward declaration and function definition
-      - [ ] For non-void functions, check that in all cases it ends with a return statement*
+      - [x] For non-void functions, check that in all cases it ends with a return statement*
         
 - [ ] Mips
     - [x] Binary operations + , - , * , and /
@@ -103,6 +107,7 @@ make sure you disable Settings > Editor > General > On Save > Remove trailing sp
     - [x] Conditional Statements: `if` and `else`
     - [x] Loops: `while`, `for`, `break`, `continue`
     - [x] Unnamed Scopes
+    - [x] Do-while loops **
     - [ ] Switch Statements: `switch`, `case`, `break`, `default`*
     - [ ] Multidimensional arrays*
     - [ ] Assignments of Array rows/complete arrays in case of multidimensional arrays*

@@ -188,6 +188,9 @@ class SemanticAnalysisVisitor(ASTVisitor):
         if returns_something(node, returns) and type_node.type.type == TypeEnum.VOID:
             Logger.get_instance().log_error("Returning something in void function.")
 
+        if not returns_something(node, returns) and type_node.type.type != TypeEnum.VOID:
+            Logger.get_instance().log_warning(f"Non-void function {variable_node.name} does not always end in a return statement")
+
         # parameter redefinition
         args_names = [child.name for child in node.children if isinstance(child, FunctionArgumentNode)]
         if has_duplicates(args_names):

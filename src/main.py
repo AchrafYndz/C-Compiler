@@ -44,11 +44,6 @@ def run(input_file, const_folding, optimize, run_mips):
     print_splitter = PrintSplitVisitor()
     print_splitter.visitScope(ast.root)
 
-    # optimize
-    if optimize:
-        optimizer = OptimizationVisitor()
-        optimizer.visitScope(ast.root)
-
     # run semantic analysis
     ast_semantic_visitor = SemanticAnalysisVisitor()
     ast_semantic_visitor.visitScope(ast.root)
@@ -59,6 +54,11 @@ def run(input_file, const_folding, optimize, run_mips):
             symbol_table=ast_semantic_visitor.symbol_table
         )
         constant_fold_visitor.visitScope(ast.root)
+
+    # optimize
+    if optimize:
+        optimizer = OptimizationVisitor()
+        optimizer.visitScope(ast.root)
 
     ast.visualize(filename="test")
 

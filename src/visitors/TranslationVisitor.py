@@ -3,7 +3,7 @@ from src.visitors.ASTVisitor import *
 
 class TranslationVisitor(ASTVisitor):
     """
-    Translates for-loops to while-loops
+    Translates for-loops and do-while-loops to while-loops
     """
     def __init__(self):
         super().__init__()
@@ -13,6 +13,10 @@ class TranslationVisitor(ASTVisitor):
         if node.id in self.visited:
             return
         self.visited.append(node.id)
+
+        do_while_loop = node.do_while
+        if do_while_loop:
+            node.children[0], node.children[1] = node.children[1], node.children[0]
 
         is_for_loop = len(node.children) > 2
         if not is_for_loop:
