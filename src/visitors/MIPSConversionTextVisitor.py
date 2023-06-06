@@ -196,6 +196,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
                 visit_method = self.nodes_dict[type(else_body)]
                 visit_method(else_body)
                 self.mips_interface.jump(f"end_{index}")
+            self.mips_interface.free_up_registers([e_reg])
 
         self.mips_interface.append_label(f"end_{index}")
 
@@ -380,10 +381,13 @@ class MIPSConversionTextVisitor(ASTVisitor):
         expression_node = node.children[0]
         visit_method = self.nodes_dict[type(expression_node)]
         visit_method(expression_node)
-        expr_reg = self.mips_interface.last_expression_registers.pop()
+        # expr_reg = self.mips_interface.last_expression_registers.pop()
+        expr_reg = self.mips_interface.last_expression_registers.pop(0)
 
         self.mips_interface.branch_equal(expr_reg, "1", f"loop_{self.end_count}")
         self.mips_interface.jump(f"end_{self.end_count}")
+
+        self.mips_interface.free_up_registers([expr_reg])
 
         self.mips_interface.append_label(f"end_{self.end_count}")
 
