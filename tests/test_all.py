@@ -1,5 +1,5 @@
 import subprocess
-from threading import Thread
+from filecmp import cmp
 
 import pytest
 import os
@@ -111,6 +111,7 @@ def test_valid():
                 f"java -jar bin/Mars4_5.jar tests/output/mips/{base_name}.asm > tests/output/mips/{base_name}.out",
                 shell=True
             )
+            assert(cmp(f"tests/output/mips/{base_name}.asm", f"tests/output/mips/{base_name}.out")), "files are not the same"
 
 
 def test_mips():
