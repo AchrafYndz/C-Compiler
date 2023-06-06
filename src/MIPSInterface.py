@@ -124,6 +124,8 @@ class MIPSInterface:
         special_chars = [';', ' ', '$', '.', ':', '-', '/', '\\n', '!', ',', '?', '<', '>', '(', ')', '=', '\\t']
         for char in special_chars:
             label = label.replace(char, '_')
+        if label[0].isnumeric():
+            label = label.replace(label[0], "_", 1)
         if defined:
             return self.variable[string], string
         label = label + "_" + str(len(self.variable))
