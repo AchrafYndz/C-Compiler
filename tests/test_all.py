@@ -111,7 +111,7 @@ def test_valid():
                 f"java -jar bin/Mars4_5.jar tests/output/mips/{base_name}.asm > tests/output/mips/{base_name}.out",
                 shell=True
             )
-            assert(cmp(f"tests/output/mips/{base_name}.out", f"tests/expected/mips/{base_name}.out")), "files are not the same"
+            assert(cmp(f"tests/output/mips/{base_name}.out", f"tests/expected/mips/{base_name}.out")), "unexpected output"
 
 
 def test_mips():
