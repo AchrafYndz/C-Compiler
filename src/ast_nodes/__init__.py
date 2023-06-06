@@ -17,3 +17,4 @@ from .FunctionCallNode import *
 from .IncludeNode import *
 from .ArrayAssignmentNode import *
 from .AssignmentNode import *
+from .CommentNode import *
