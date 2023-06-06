@@ -253,6 +253,9 @@ class MIPSConversionTextVisitor(ASTVisitor):
                     else:
                         self.mips_interface.load_variable("t0", to_print_node.name)
                         is_variable = True
+                elif isinstance(to_print_node, FunctionCallNode):
+                    self.mips_interface.print("v0", TypeEnum.INT, is_expression=True)
+                    return
                 else:
                     type_ = TypeEnum.INT
                     is_expression = True

@@ -2,8 +2,6 @@
 
 int main()
 {
-   //   int n, i = 3, count, c; /*! were told this was not necessary !*/
-
    int n;
    int i = 3;
    int count;

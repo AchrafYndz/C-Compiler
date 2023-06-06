@@ -4,10 +4,10 @@
 int main(){
 	int x = 0;
 	int* xp = &x;
-	*xp = 10;
+	x = 10;
 	printf("%d; ", x);
 	printf("%d\n", *xp);
-	(*xp)++;
+	x++;
 	printf("%d; ", x);
 	printf("%d\n", *xp);
 	return 1;

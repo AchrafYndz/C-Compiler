@@ -5,14 +5,19 @@ int main(){
 	int x = 9;
     int a[2];
 	printf("%d; ", -(-9));
-    printf("%d; ", ++x);
+    ++x;
+    printf("%d; ", x);
     a[0] = 15;
 	a[1] = 12;
 	x = 12;
-	printf("%d; ", --a[1]);
-    printf("%d; ", x++);
+	int t1 = a[1];
+	--t1;
+	printf("%d; ", t1);
     printf("%d; ", x);
-	a[0]--;
-    printf("%d; ", a[0]);
+    x++;
+    printf("%d; ", x);
+    int t2 = a[0];
+    t2--;
+    printf("%d; ", t2);
     return 1;
 }
