@@ -1,6 +1,7 @@
 import re
 import struct
 from src.Type import TypeEnum, Type
+from src.ast_nodes import UnaryExpressionNode
 
 from src.ast_nodes.BranchNode import BranchNode
 from src.ast_nodes.LiteralNode import LiteralNode
@@ -111,3 +112,12 @@ def float_to_hex(f):
 def cast_register_to_float(register, mi):
     mi.append_instruction(f"mtc1 $t0, $f0")
     mi.append_instruction(f"cvt.s.w $t0, $f0")
+
+
+def extract_deref(node, ptr_level=1):
+    child_node = node.children[0]
+    if isinstance(child_node, UnaryExpressionNode):
+        ptr_level += 1
+        return extract_deref(child_node, ptr_level)
+    elif isinstance(child_node, VariableNode):
+        return child_node.name, ptr_level
