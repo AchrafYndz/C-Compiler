@@ -89,9 +89,9 @@
     - [x] Function Calls
     - [x] Return Keyword
     - [x] Include `stdio.h`
-    - [ ] Conversions (bool <> char <> int <> float)
+    - [x] Conversions (bool <> char <> int <> float)
     - [x] Arguments
-    - [ ] Printf/Scanf with text arguments e.g. `printf("Hello, %s\n", name)`;
+    - [x] Printf/Scanf formatting e.g. `printf("Hello, %s\n", name)`;
     - [x] Scanf
     - [ ] Arrays
     - [ ] Conditional Statements: `if` and `else`
@@ -103,3 +103,7 @@
     - [ ] Dynamic arrays*
     - [ ] Include comments in compiled MIPS*
     - [ ] C code comments for each instruction*
+
+# Note:
+In case the binary operations file test fails, and you're using Pycharm:
+make sure you disable Settings > Editor > On Save > Remove trailing spaces
