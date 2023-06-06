@@ -216,7 +216,8 @@ class ASTCreator(CListener):
         self.current_node = self.current_node.parent
 
     def enterLoop(self, ctx: CParser.LoopContext):
-        node = LoopNode()
+        do_while = bool(ctx.DO())
+        node = LoopNode(do_while)
         self.current_node.addChild(node)
         self.current_node = node
 

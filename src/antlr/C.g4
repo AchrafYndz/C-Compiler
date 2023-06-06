@@ -23,6 +23,7 @@ CASE: 'case';
 
 FOR: 'for';
 WHILE: 'while';
+DO: 'do';
 CONTINUE: 'continue';
 BREAK: 'break';
 RETURN: 'return';
@@ -144,7 +145,8 @@ conditional: IF LPARA expression RPARA statement (ELSE statement)?
              | CASE literal COLON statement;
 
 loop: WHILE LPARA expression RPARA statement
-      | FOR LPARA declaration? SEMI expression? SEMI expression? RPARA statement;
+      | FOR LPARA declaration? SEMI expression? SEMI expression? RPARA statement
+      | DO statement WHILE LPARA expression RPARA SEMI;
 
 branch: RETURN expression? SEMI
         | (CONTINUE|BREAK) SEMI;

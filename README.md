@@ -1,9 +1,11 @@
 # C-Compiler
 
-# Note:
+### Note:
 - In case BinaryOperations.c test fails, and you're using Pycharm:
 make sure you disable Settings > Editor > General > On Save > Remove trailing spaces
 - Python 3.10 or newer required
+
+### Checklist:
 
 *optional
 
@@ -47,6 +49,7 @@ make sure you disable Settings > Editor > General > On Save > Remove trailing sp
     - [x] Void Functions
     - [x] Arrays
     - [x] Include `stdio.h`
+    - [x] Do-while loops **
     - [ ] Multidimensional arrays*
     - [ ] Assignments of Array rows/complete arrays in case of multidimensional arrays*
     - [ ] Dynamic arrays*
@@ -55,6 +58,7 @@ make sure you disable Settings > Editor > General > On Save > Remove trailing sp
   - [x] Constant folding
   - [x] Constant Propagation
   - [x] Convert for-loops to while-loops
+  - [x] Convert do-while-loops to while-loops **
   - [ ] Convert switch statements to if-statements*
   - [x] Optimizations
     - [x] Do not generate code for statements after `return`
@@ -103,6 +107,7 @@ make sure you disable Settings > Editor > General > On Save > Remove trailing sp
     - [x] Conditional Statements: `if` and `else`
     - [x] Loops: `while`, `for`, `break`, `continue`
     - [x] Unnamed Scopes
+    - [x] Do-while loops **
     - [ ] Switch Statements: `switch`, `case`, `break`, `default`*
     - [ ] Multidimensional arrays*
     - [ ] Assignments of Array rows/complete arrays in case of multidimensional arrays*
