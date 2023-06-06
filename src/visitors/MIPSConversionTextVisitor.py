@@ -101,7 +101,6 @@ class MIPSConversionTextVisitor(ASTVisitor):
                     visited_func_call = True
                 else:
                     operators.append("s1")
-                    print(operators)
             elif isinstance(child_node, UnaryExpressionNode) and child_node.operator in ["++", "--"]:
                 var_node = child_node.children[0]
 
