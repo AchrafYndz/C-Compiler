@@ -272,7 +272,8 @@ class MIPSConversionTextVisitor(ASTVisitor):
                         "%c": TypeEnum.CHAR,
                         "%s": TypeEnum.STRING
                     }
-                    to_cast_type = types[node.children[0].value]
+                    type_arg = node.children[0].value.replace('"', '')
+                    to_cast_type = types[type_arg]
                     self.mips_interface.print(to_print, to_cast_type, is_variable, is_expression)
                     """
                     types = {
