@@ -93,9 +93,9 @@
     - [x] Arguments
     - [x] Printf/Scanf formatting e.g. `printf("Hello, %s\n", name)`;
     - [x] Scanf
-    - [ ] Arrays
-    - [ ] Conditional Statements: `if` and `else`
-    - [ ] Loops: `while`, `for`, `break`, `continue`
+    - [x] Arrays
+    - [x] Conditional Statements: `if` and `else`
+    - [x] Loops: `while`, `for`, `break`, `continue`
     - [x] Unnamed Scopes
     - [ ] Switch Statements: `switch`, `case`, `break`, `default`*
     - [ ] Multidimensional arrays*

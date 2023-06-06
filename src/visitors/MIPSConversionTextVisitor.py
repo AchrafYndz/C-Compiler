@@ -122,6 +122,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
         if node.sort == "continue":
             self.mips_interface.jump(f"loop_{self.current_loop_id}")
         elif node.sort == "break":
+            print(f"jumping because of break: {self.current_loop_id}")
             self.mips_interface.jump(f"end_{self.current_loop_id}")
         elif node.sort == "return":
             if not node.children:
@@ -261,17 +262,25 @@ class MIPSConversionTextVisitor(ASTVisitor):
                     label = self.mips_interface.variable[to_print]
                     self.mips_interface.print(label, type_)
                 else:
-                    self.mips_interface.print(to_print, type_, is_variable, is_expression)
-                    """
                     types = {
                         "%i": TypeEnum.INT,
                         "%f": TypeEnum.FLOAT,
-                        "%d": TypeEnum.FLOAT,
+                        "%d": TypeEnum.INT,
                         "%c": TypeEnum.CHAR,
                         "%s": TypeEnum.STRING
                     }
                     to_cast_type = types[node.children[0].value]
-                    register = self.mips_interface.get_free_register()
+                    self.mips_interface.print(to_print, to_cast_type, is_variable, is_expression)
+                    """
+                    types = {
+                        "%i": TypeEnum.INT,
+                        "%f": TypeEnum.FLOAT,
+                        "%d": TypeEnum.INT,
+                        "%c": TypeEnum.CHAR,
+                        "%s": TypeEnum.STRING
+                    }
+                    to_cast_type = types[node.children[0].value]
+                    #register = self.mips_interface.get_free_register()
                     if to_cast_type == TypeEnum.FLOAT:
                         '''if not is_variable:
                             self.mips_interface.load_immediate("t0", cast_to_type(to_cast_type, to_print))
@@ -368,10 +377,13 @@ class MIPSConversionTextVisitor(ASTVisitor):
         self.visitChildren(node)
 
     def visitLoop(self, node: LoopNode):
-        self.end_count += 1
-        self.current_loop_id = self.end_count
+        #self.end_count += 1
+        #self.current_loop_id = self.end_count
 
-        self.mips_interface.append_label(f"loop_{self.end_count}")
+        index = uuid.uuid4().hex
+        self.current_loop_id = index
+        
+        self.mips_interface.append_label(f"loop_{index}")
         # body
         loop_body = node.children[1]
         visit_method = self.nodes_dict[type(loop_body)]
@@ -384,15 +396,15 @@ class MIPSConversionTextVisitor(ASTVisitor):
         # expr_reg = self.mips_interface.last_expression_registers.pop()
         expr_reg = self.mips_interface.last_expression_registers.pop(0)
 
-        self.mips_interface.branch_equal(expr_reg, "1", f"loop_{self.end_count}")
-        self.mips_interface.jump(f"end_{self.end_count}")
+        self.mips_interface.branch_equal(expr_reg, "1", f"loop_{index}")
+        self.mips_interface.jump(f"end_{index}")
 
         self.mips_interface.free_up_registers([expr_reg])
 
-        self.mips_interface.append_label(f"end_{self.end_count}")
+        self.mips_interface.append_label(f"end_{index}")
 
-        self.end_count -= 1
-        self.current_loop_id = self.end_count
+        #self.end_count -= 1
+        #self.current_loop_id = i
 
     def visitScope(self, node: ScopeNode):
         scope_to_enter = self.symbol_table.get_scope(str(self.scope_counter))

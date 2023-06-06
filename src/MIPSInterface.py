@@ -277,14 +277,24 @@ class MIPSInterface:
         m_register = "a0" if type_ != TypeEnum.FLOAT else "t0"
 
         if is_expression:
-            self.move("a0", value)
+            self.move(m_register, value)
         elif is_variable:
-            self.move("a0", "t0")
+            self.move(m_register, "t0")
         elif v0_argument == 4:
-            self.load_address("a0", value)
+            self.load_address(m_register, value)
         else:
-            self.load_immediate("a0", value)
+            self.load_immediate(m_register, value)
         self.load_immediate("v0", v0_argument)  # TODO: for now only ints
+
+        # register = self.mips_interface.get_free_register()
+        if type_ == TypeEnum.FLOAT:
+            '''if not is_variable:
+                self.mips_interface.load_immediate("t0", cast_to_type(to_cast_type, to_print))
+            '''
+            self.append_instruction(f"mtc1 $t0, $f0")
+            self.append_instruction(f"swc1 $f0, 0($sp)")
+            self.append_instruction(f"mov.s $f12, $f0")
+
         self.syscall()
 
     def scan(self, var_name):
