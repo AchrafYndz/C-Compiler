@@ -1,7 +1,7 @@
 from src.MIPSInterface import MIPSInterface
 from src.MIPSUtil import INSTRUCTIONS
 from src.SymbolTable import SymbolTable
-from src.Util import get_type, cast_to_type, extract_leaves
+from src.Util import get_type, cast_to_type, extract_leaves, extract_deref
 from src.ast_nodes import *
 from src.visitors.ASTVisitor import ASTVisitor
 import uuid
@@ -436,7 +436,14 @@ class MIPSConversionTextVisitor(ASTVisitor):
                     register,
                     "1"
                 )
-                self.mips_interface.store_in_variable(child_node.name, result_register)
+                if isinstance(child_node, VariableNode):
+                    self.mips_interface.store_in_variable(child_node.name, result_register)
+                elif isinstance(child_node, UnaryExpressionNode) and child_node.operator == "*":
+                    var_node = child_node.children[0]
+                    assert isinstance(var_node, VariableNode), "Dereference of non variable"
+                    self.mips_interface.store_in_variable(var_node.name, result_register)
+                else:
+                    raise ValueError(f"Expected {node.operator} of variable or *variable")
                 self.mips_interface.last_expression_registers.pop(0)
             self.mips_interface.free_up_registers([register])
 
@@ -451,9 +458,14 @@ class MIPSConversionTextVisitor(ASTVisitor):
             self.mips_interface.last_expression_registers.append(register)
 
         elif node.operator == "*":
+            if isinstance(node.parent, UnaryExpressionNode) and node.parent.operator == "*":
+                return
             register = self.mips_interface.get_free_register()
-            self.mips_interface.load_variable(register, child_node.name)
-            self.mips_interface.load_word(register, 0, register)
+            var_name, ptr_level = extract_deref(node)
+            # get number of star operators
+            self.mips_interface.load_variable(register, var_name)
+            for _ in range(ptr_level):
+                self.mips_interface.load_word(register, 0, register)
             self.mips_interface.last_expression_registers.append(register)
 
         else:
