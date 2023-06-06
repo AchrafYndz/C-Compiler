@@ -52,7 +52,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
                 self.mips_interface.load_variable("t0", node.children[0].name)
             elif isinstance(node.children[0], FunctionCallNode):
                 register = "t0"
-                self.mips_interface.move("t0", "v0")
+                self.mips_interface.move("t0", "v1")
             else:
                 register = self.mips_interface.last_expression_registers.pop(0)
             self.mips_interface.store_in_variable(node.name, register)
@@ -95,7 +95,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
                 self.mips_interface.load_immediate(free_register, cast_to_type(type_, child_node.value))
                 operators.append(free_register)
             elif isinstance(child_node, FunctionCallNode):
-                operators.append("v0")
+                operators.append("v1")
             elif isinstance(child_node, UnaryExpressionNode) and child_node.operator in ["++", "--"]:
                 var_node = child_node.children[0]
 
@@ -130,14 +130,14 @@ class MIPSConversionTextVisitor(ASTVisitor):
             if isinstance(node.children[0], VariableNode):
                 value_register = self.mips_interface.get_free_register()
                 self.mips_interface.load_variable(value_register, node.children[0].name)
-                self.mips_interface.move("v0", value_register)
+                self.mips_interface.move("v1", value_register)
                 self.mips_interface.free_up_registers([value_register])
             elif isinstance(node.children[0], LiteralNode):
-                self.mips_interface.add_immediate_unsigned("v0", "zero", node.children[0].value)
+                self.mips_interface.add_immediate_unsigned("v1", "zero", node.children[0].value)
             elif isinstance(node.children[0], FunctionCallNode):
                 pass
             else:
-                self.mips_interface.move("v0", self.mips_interface.last_expression_registers.pop(0))
+                self.mips_interface.move("v1", self.mips_interface.last_expression_registers.pop(0))
 
     def visitConditional(self, node: ConditionalNode):
         expression_node = node.children[0]
@@ -516,7 +516,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
                 self.mips_interface.load_variable(register, node.children[0].name)
             elif isinstance(node.children[0], FunctionCallNode):
                 register = self.mips_interface.get_free_register()
-                self.mips_interface.move(register, "v0")
+                self.mips_interface.move(register, "v1")
             else:
                 register = self.mips_interface.last_expression_registers.pop(0)
         # undefined variable
