@@ -1,4 +1,10 @@
 # C-Compiler
+
+# Note:
+- In case BinaryOperations.c test fails, and you're using Pycharm:
+make sure you disable Settings > Editor > General > On Save > Remove trailing spaces
+- Python 3.10 or newer required
+
 *optional
 
 **our own additions
@@ -104,6 +110,3 @@
     - [ ] Include comments in compiled MIPS*
     - [ ] C code comments for each instruction*
 
-# Note:
-In case the binary operations file test fails, and you're using Pycharm:
-make sure you disable Settings > Editor > General > On Save > Remove trailing spaces
