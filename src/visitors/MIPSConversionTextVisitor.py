@@ -303,6 +303,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
                 pass
             else:
                 self.mips_interface.scan(to_write_node.name)
+                self.mips_interface.last_expression_registers.pop(0)
 
         else:
             for i, arg in enumerate(node.children):
