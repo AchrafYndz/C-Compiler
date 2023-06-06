@@ -17,4 +17,5 @@ int main(){
     printf("%i", a);
     int d = mult(a, b);
     printf("%i", d);
+    return 0;
 }

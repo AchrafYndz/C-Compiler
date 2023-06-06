@@ -75,7 +75,7 @@ make sure you disable Settings > Editor > General > On Save > Remove trailing sp
       - [x] Semantic Analysis visitor should support function scopes
       - [x] Consistency return statement with return type of function
       - [x] Consistency forward declaration and function definition
-      - [ ] For non-void functions, check that in all cases it ends with a return statement*
+      - [x] For non-void functions, check that in all cases it ends with a return statement*
         
 - [ ] Mips
     - [x] Binary operations + , - , * , and /
