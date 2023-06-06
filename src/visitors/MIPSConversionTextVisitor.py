@@ -279,7 +279,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
                         self.mips_interface.append_instruction(f"mtc1 $t0, $f0")
                         self.mips_interface.append_instruction(f"swc1 $f0, 0($sp)")
                         self.mips_interface.append_instruction(f"mov.s $f12, $f0")
-                    if not is_variable:
+                    if not (is_variable or is_expression):
                         self.mips_interface.print(cast_to_type(to_cast_type, to_print), to_cast_type, is_variable, is_expression)
                     else:
                         self.mips_interface.print(to_print, to_cast_type, is_variable, is_expression)

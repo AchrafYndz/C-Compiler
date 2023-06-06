@@ -1,7 +1,7 @@
 import uuid
 
 from src.Type import TypeEnum, Type
-from src.Util import float_to_hex
+from src.Util import float_to_hex, cast_to_type
 from src.ast_nodes import LiteralNode, VariableNode
 
 
@@ -236,10 +236,10 @@ class MIPSInterface:
     def write_to_file(self, filename):
         file = open(filename, "w")
         file.write(".data\n")
-        for string, label in self.variable.items():
-            file.write(label + ": .asciiz \"" + string + '\" \n')
         for line in self.data:
             file.write(line + '\n')
+        for string, label in self.variable.items():
+            file.write(label + ": .asciiz \"" + string + '\" \n')
         file.write('\n')
 
         found_label = False
@@ -263,9 +263,6 @@ class MIPSInterface:
         self.append_instruction(f"swc1 ${register1}, {offset}(${register2})")
 
     def print(self, value, type_: TypeEnum, is_variable=False, is_expression=False):
-        # TODO: remove this line
-        # if not type_:
-        #     type_ = TypeEnum.INT
         v0_arguments = {
             TypeEnum.INT: 1,
             TypeEnum.FLOAT: 2,
@@ -273,6 +270,12 @@ class MIPSInterface:
             TypeEnum.CHAR: 11
         }
         v0_argument = v0_arguments[type_]
+
+        if not (is_variable or is_expression):
+            value = cast_to_type(type_, value)
+
+        m_register = "a0" if type_ != TypeEnum.FLOAT else "t0"
+
         if is_expression:
             self.move("a0", value)
         elif is_variable:
