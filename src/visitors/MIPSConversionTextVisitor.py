@@ -127,7 +127,6 @@ class MIPSConversionTextVisitor(ASTVisitor):
         if node.sort == "continue":
             self.mips_interface.jump(f"loop_{self.current_loop_id}")
         elif node.sort == "break":
-            print(f"jumping because of break: {self.current_loop_id}")
             self.mips_interface.jump(f"end_{self.current_loop_id}")
         elif node.sort == "return":
             if not node.children:
