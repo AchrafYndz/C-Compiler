@@ -85,6 +85,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
 
         mips_instruction = INSTRUCTIONS[node.operator]
         operators = []
+        visited_func_call = False
         for i, child_node in enumerate(node.children):
             if isinstance(child_node, VariableNode):
                 free_register = self.mips_interface.get_free_register()
@@ -95,7 +96,12 @@ class MIPSConversionTextVisitor(ASTVisitor):
                 self.mips_interface.load_immediate(free_register, cast_to_type(type_, child_node.value))
                 operators.append(free_register)
             elif isinstance(child_node, FunctionCallNode):
-                operators.append("v1")
+                if not visited_func_call:
+                    operators.append("v1")
+                    visited_func_call = True
+                else:
+                    operators.append("s1")
+                    print(operators)
             elif isinstance(child_node, UnaryExpressionNode) and child_node.operator in ["++", "--"]:
                 var_node = child_node.children[0]
 
@@ -254,7 +260,7 @@ class MIPSConversionTextVisitor(ASTVisitor):
                         self.mips_interface.load_variable("t0", to_print_node.name)
                         is_variable = True
                 elif isinstance(to_print_node, FunctionCallNode):
-                    self.mips_interface.print("v0", TypeEnum.INT, is_expression=True)
+                    self.mips_interface.print("v1", TypeEnum.INT, is_expression=True)
                     return
                 else:
                     type_ = TypeEnum.INT
@@ -320,6 +326,18 @@ class MIPSConversionTextVisitor(ASTVisitor):
                     expression_register = self.mips_interface.last_expression_registers.pop(0)
                     self.mips_interface.move(f"a{i}", expression_register)
             self.mips_interface.jump_and_link(node.name)
+            parent_node = node.parent
+            if not isinstance(node.parent, BinaryExpressionNode):
+                return
+            first_child = parent_node.children[0] == node
+            if not first_child:
+                return
+            sibling = parent_node.children[1]
+            if not isinstance(sibling, FunctionCallNode):
+                return
+
+            # fib(i-1) + fib(i-2)
+            self.mips_interface.move("s1", "v1")
 
     def visitFunction(self, node: FunctionNode):
         '''

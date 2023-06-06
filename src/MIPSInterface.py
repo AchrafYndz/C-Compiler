@@ -24,6 +24,7 @@ class MIPSInterface:
         return self.free_registers.pop(0)
 
     def free_up_registers(self, registers):
+        registers = [register for register in registers if register in [f"t{i}" for i in range(8)]]
         if any([register in self.free_registers for register in registers]):
             raise ValueError("Trying to free a register that should already be free")
         self.free_registers += registers
