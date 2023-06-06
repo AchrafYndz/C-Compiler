@@ -10,9 +10,6 @@ class MIPSInterface:
         self.variable = {}
         self.data = []
         self.text = []
-        self.move("fp", "sp")
-        self.jump_and_link("main")
-        self.exit()
 
         self.global_variables = {}
         self.local_variables = {}  # var_name: int
@@ -199,8 +196,14 @@ class MIPSInterface:
         self.store_word(register, offset, "sp")
 
     def load_variable(self, register, var_name):
-        offset = self.local_variables[var_name]
-        self.load_word(register, offset, "sp")
+        if var_name in self.local_variables:
+            offset = self.local_variables[var_name]
+            self.load_word(register, offset, "sp")
+        elif var_name in self.global_variables:
+            offset = self.global_variables[var_name]
+            self.load_word(register, offset, "gp")
+        else:
+            raise ValueError("Variable not in local nor global variables")
 
     def store_word(self, register1, offset, register2):
         self.append_instruction(f"sw ${register1}, {offset}(${register2})")
@@ -239,9 +242,16 @@ class MIPSInterface:
             file.write(line + '\n')
         file.write('\n')
 
+        found_label = False
         file.write(".text\n")
         for line in self.text:
             if line[-1] == ":":
+                if not found_label:
+                    file.write("move $fp, $sp\n")
+                    file.write("jal main\n")
+                    file.write("li $v0, 10\n")
+                    file.write("syscall\n")
+                    found_label = True
                 file.write("\n")
             file.write(line + '\n')
         file.close()
