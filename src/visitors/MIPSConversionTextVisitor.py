@@ -339,15 +339,6 @@ class MIPSConversionTextVisitor(ASTVisitor):
             self.mips_interface.move("s1", "v1")
 
     def visitFunction(self, node: FunctionNode):
-        '''
-        REGISTERS = {
-            't': 10,
-            's': 8,
-            'a': 4,
-            'v': 2,
-            'f': 31
-        }'''
-
         # start
         variable_node = node.children[1]
         has_body = False
