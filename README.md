@@ -59,8 +59,8 @@ make sure you disable Settings > Editor > General > On Save > Remove trailing sp
   - [x] Optimizations
     - [x] Do not generate code for statements after `return`
     - [x] Do not generate code for statements after `break` or `continue`
+    - [x] Do not generate code for conditionals that are always false*  
     - [ ] Do not generate code for unused variables*
-    - [ ] Do not generate code for conditionals that are always false*  
 
 - [x] Error Analysis
     - [x] Syntax Errors
