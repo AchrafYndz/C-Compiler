@@ -21,7 +21,8 @@ class ASTVisitor:
             TypeDeclarationNode: self.visitType_declaration,
             UnaryExpressionNode: self.visitUnary_expression,
             VariableDefinitionNode: self.visitVariable_definition,
-            VariableNode: self.visitVariable
+            VariableNode: self.visitVariable,
+            CommentNode: self.visitComment
         }
 
     def visitChildren(self, node):
@@ -81,4 +82,7 @@ class ASTVisitor:
         self.visitChildren(node)
 
     def visitVariable(self, node: VariableNode):
+        self.visitChildren(node)
+        
+    def visitComment(self, node: CommentNode):
         self.visitChildren(node)

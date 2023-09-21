@@ -279,28 +279,6 @@ class MIPSConversionTextVisitor(ASTVisitor):
                     type_arg = node.children[0].value.replace('"', '')
                     to_cast_type = types[type_arg]
                     self.mips_interface.print(to_print, to_cast_type, is_variable, is_expression)
-                    """
-                    types = {
-                        "%i": TypeEnum.INT,
-                        "%f": TypeEnum.FLOAT,
-                        "%d": TypeEnum.INT,
-                        "%c": TypeEnum.CHAR,
-                        "%s": TypeEnum.STRING
-                    }
-                    to_cast_type = types[node.children[0].value]
-                    #register = self.mips_interface.get_free_register()
-                    if to_cast_type == TypeEnum.FLOAT:
-                        '''if not is_variable:
-                            self.mips_interface.load_immediate("t0", cast_to_type(to_cast_type, to_print))
-                        '''
-                        self.mips_interface.append_instruction(f"mtc1 $t0, $f0")
-                        self.mips_interface.append_instruction(f"swc1 $f0, 0($sp)")
-                        self.mips_interface.append_instruction(f"mov.s $f12, $f0")
-                    if not (is_variable or is_expression):
-                        self.mips_interface.print(cast_to_type(to_cast_type, to_print), to_cast_type, is_variable, is_expression)
-                    else:
-                        self.mips_interface.print(to_print, to_cast_type, is_variable, is_expression)
-                    """
 
         elif node.name == "scanf":
             assert isinstance(node.children[1], UnaryExpressionNode), "scanf expected unary expression"
@@ -536,3 +514,10 @@ class MIPSConversionTextVisitor(ASTVisitor):
 
     def visitVariable(self, node: VariableNode):
         self.visitChildren(node)
+        
+    def visitComment(self, node: CommentNode):
+        self.visitChildren(node)
+        lines = node.content.splitlines()
+        lines_with_hashtags = ['#' + line for line in lines]
+        result = '\n'.join(lines_with_hashtags)
+        self.mips_interface.append_instruction(f"{result}")

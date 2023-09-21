@@ -76,7 +76,7 @@ DOUBLE_QUOTE: '"';
 
 STRING: DOUBLE_QUOTE .*? DOUBLE_QUOTE;
 
-COMMENT: (LINE_COMMENT | BLOCK_COMMENT) -> channel(2);
+COMMENT: (LINE_COMMENT | BLOCK_COMMENT); //-> channel(2);
 fragment
 LINE_COMMENT: '//' ~[\r\n]*;
 fragment
@@ -110,11 +110,14 @@ declaration: type_declaration variable_definition (COMMA variable_definition)*;
 variable_definition: (IDENTIFIER (LBRACK literal RBRACK)? (ASS expression)?)
                     | IDENTIFIER LBRACK RBRACK ASS LBRACE (expression (COMMA expression)*)? RBRACE;
 
+comment: COMMENT;
+
 statement: scope
            | expression SEMI
            | conditional
            | loop
-           | branch;
+           | branch
+           | comment;
 
 /* https://www.tutorialspoint.com/cprogramming/c_operators_precedence.htm */
 expression: (function_call|print|scan)

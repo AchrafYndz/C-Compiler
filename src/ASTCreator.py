@@ -287,3 +287,7 @@ class ASTCreator(CListener):
         to_include = ctx.IDENTIFIER().getText() + ctx.FILE_EXT().getText()
         node = IncludeNode(to_include)
         self.current_node.addChild(node)
+    
+    def enterComment(self, ctx:CParser.CommentContext):
+        node = CommentNode(ctx.COMMENT().getText())
+        self.current_node.addChild(node)
