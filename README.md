@@ -1,117 +1,60 @@
 # C-Compiler
 
-### Note:
-- In case BinaryOperations.c test fails, and you're using Pycharm:
-make sure you disable Settings > Editor > General > On Save > Remove trailing spaces
-- Python 3.10 or newer required
+<center><img src="icon.png" alt="icon" width="200"/></center>
+<br><br>
 
-### Checklist:
+[![Python](https://img.shields.io/badge/Python-%3E%3D3.10-blue)](https://www.python.org/downloads/)
+[![ANTLR4](https://img.shields.io/badge/antlr4-grammar-yellow)](https://www.antlr.org/)
+[![MIPS Assembly](https://img.shields.io/badge/MIPS-Assembly-red)](https://en.wikipedia.org/wiki/MIPS_architecture)
 
-*optional
+This is a compiler project for a subset of C, implemented in Python. The compiler takes C code as input and generates MIPS assembly code as output. It also includes a script to automatically build and run the assembly code using MARS MIPS simulator.
 
-**our own additions
+## Features
 
-- [x] Grammar
-    -  [x] Binary operators
-        - [x] `+`, `-` , `*` and `/`
-        - [x] `%`*
-    -  [x] Unary Operators: `+` and `-`
-    -  [x] Relational operators
-        - [x] `>`, `<` and `==`
-        - [x] `>=` , `<=` and `!=`*
-    -  [x] Logical operators `&&` , `||` , and `!`
-    -  [x] Brackets to overwrite the order of operations
-    -  [x] Types
-        - [x] char
-        - [x] int
-        - [x] float
-        - [x] pointer
-    - [x] Identifiers
-    - [x] Pointer Operations: `*` and `&`
-    - [x] Identifier Operations: `++` and `--`*
-    - [x] Definitions
-    - [x] Declarations
-    - [x] Implicit Conversions
-    - [x] Explicit Conversions*
-    - [x] Comments
-    - [x] printf() for char, int & float
-    - [x] Conditional Statements: `if` and `else`
-    - [x] Loops: `while`, `for`, `break`, `continue`
-    - [x] Unnamed Scopes
-    - [x] Switch Statements: `switch`, `case`, `break`, `default`*
-    - [x] Function Scopes
-    - [x] Local and Global variables
-    - [x] Functions
-    - [x] Function Definitions
-    - [x] Function Calls
-    - [x] Arguments
-    - [x] Return Keyword
-    - [x] Void Functions
-    - [x] Arrays
-    - [x] Include `stdio.h`
-    - [x] Do-while loops **
-    - [ ] Multidimensional arrays*
-    - [ ] Assignments of Array rows/complete arrays in case of multidimensional arrays*
-    - [ ] Dynamic arrays*
+- Parses C code using the ANTLR4 grammar.
+- Compiles C code to MIPS assembly.
+- Provides an option to visualize the abstract syntax tree (AST) as a PDF.
+- Fully tested for syntax and semantic errors.
+- Supports Python 3.10 or higher.
 
-- [x] AST
-  - [x] Constant folding
-  - [x] Constant Propagation
-  - [x] Convert for-loops to while-loops
-  - [x] Convert do-while-loops to while-loops **
-  - [ ] Convert switch statements to if-statements*
-  - [x] Optimizations
-    - [x] Do not generate code for statements after `return`
-    - [x] Do not generate code for statements after `break` or `continue`
-    - [x] Do not generate code for conditionals that are always false*  
-    - [ ] Do not generate code for unused variables*
+## Usage
 
-- [x] Error Analysis
-    - [x] Syntax Errors
-    - [x] Semantic Errors
-      - [x] Use of an undefined or uninitialized variable.
-      - [x] Redeclaration or redefinition of an existing variable.
-      - [x] Operations or assignments of incompatible types.
-      - [x] Assignment to an rvalue.
-      - [x] Assignment to a const variable.
-      - [x] Implicit Conversions warning*
-      - [x] Semantic Analysis visitor should support scoping
-      - [x] Semantic Analysis visitor should support function scopes
-      - [x] Consistency return statement with return type of function
-      - [x] Consistency forward declaration and function definition
-      - [x] For non-void functions, check that in all cases it ends with a return statement*
-        
-- [ ] Mips
-    - [x] Binary operations + , - , * , and /
-    - [x] Binary operations > , < , and ==
-    - [x] Unary operators + and -
-    - [x] Identifier Operations ++ and --
-    - [x] Comparison operators >= , <= , and !=
-    - [x] Logical operators && , || , and !
-    - [x] Binary operator %
-    - [x] Printf
-    - [x] Pointers + pointer operators
-    - [x] Local and Global variables
-    - [x] Function Scopes
-    - [x] Functions
-    - [x] Void Functions
-    - [x] Function Definitions
-    - [x] Function Calls
-    - [x] Return Keyword
-    - [x] Include `stdio.h`
-    - [x] Conversions (bool <> char <> int <> float)
-    - [x] Arguments
-    - [x] Printf/Scanf formatting e.g. `printf("Hello, %s\n", name)`;
-    - [x] Scanf
-    - [x] Arrays
-    - [x] Conditional Statements: `if` and `else`
-    - [x] Loops: `while`, `for`, `break`, `continue`
-    - [x] Unnamed Scopes
-    - [x] Do-while loops **
-    - [ ] Switch Statements: `switch`, `case`, `break`, `default`*
-    - [ ] Multidimensional arrays*
-    - [ ] Assignments of Array rows/complete arrays in case of multidimensional arrays*
-    - [ ] Dynamic arrays*
-    - [ ] Include comments in compiled MIPS*
-    - [ ] C code comments for each instruction*
+To use the compiler, run the following command:
 
+```shell
+python3 main.py [path-to-C-file] [options]
+```
+
+The available options are:
+
+- -v or --visualize: Visualize the abstract syntax tree as a PDF.
+- -r or --run: Run the generated MIPS assembly code using MARS.
+- -h or --help: Show the help menu
+
+## Prerequisites
+Make sure you have the following dependencies installed:
+
+- Python >= 3.10
+- ANTLR4
+- MARS MIPS simulator (included in the repository)
+
+## Getting Started
+
+Clone this repository:
+```shell
+git clone https://github.com/AchrafYndz/C-Compiler.git
+```
+Install the required dependencies:
+```shell
+pip install -r requirements.txt
+```
+Run the compiler with your C code:
+```shell
+python3 main.py path/to/your/C/file.c [options]
+```
+## Contributing
+This project was developed as a group project by AchrafYndz and 9MaxR9. Contributions are welcome! If you find any issues or want to add new features, please open an issue or submit a pull request.
+
+
+## License
+This project is licensed under the MIT License.
