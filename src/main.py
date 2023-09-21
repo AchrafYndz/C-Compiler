@@ -1,3 +1,4 @@
+import argparse
 import sys
 import subprocess
 from antlr4 import *
@@ -17,7 +18,7 @@ from src.visitors.ConstantFoldVisitor import ConstantFoldVisitor
 from src.visitors.TranslationVisitor import TranslationVisitor
 
 
-def run(input_file, const_folding, optimize, run_mips):
+def run(input_file, visualize, run_mips):
     input_stream = FileStream(input_file)
     lexer = CLexer(input_stream)
     stream = CommonTokenStream(lexer)
@@ -40,6 +41,10 @@ def run(input_file, const_folding, optimize, run_mips):
     translator = TranslationVisitor()
     translator.visitScope(ast.root)
 
+    if visualize:
+        # visualize the ast
+        ast.visualize(filename="test")
+
     # split printf formatting
     print_splitter = PrintSplitVisitor()
     print_splitter.visitScope(ast.root)
@@ -48,41 +53,44 @@ def run(input_file, const_folding, optimize, run_mips):
     ast_semantic_visitor = SemanticAnalysisVisitor()
     ast_semantic_visitor.visitScope(ast.root)
 
-    if const_folding:
-        # constant fold
-        constant_fold_visitor = ConstantFoldVisitor(
-            symbol_table=ast_semantic_visitor.symbol_table
-        )
-        constant_fold_visitor.visitScope(ast.root)
+    # constant fold
+    constant_fold_visitor = ConstantFoldVisitor(
+        symbol_table=ast_semantic_visitor.symbol_table
+    )
+    constant_fold_visitor.visitScope(ast.root)
 
     # optimize
-    if optimize:
-        optimizer = OptimizationVisitor()
-        optimizer.visitScope(ast.root)
+    optimizer = OptimizationVisitor()
+    optimizer.visitScope(ast.root)
 
     ast.visualize(filename="test")
 
     # generate mips code
-    if run_mips:
-        mips_converter = MIPSConverter(
-            symbol_table=ast_semantic_visitor.symbol_table,
-        )
-        mips_converter.convert(ast.root, "test")
+    mips_converter = MIPSConverter(
+        symbol_table=ast_semantic_visitor.symbol_table,
+    )
+    mips_converter.convert(ast.root, "test")
 
+    if run_mips:
+        # run the generated Mips code using Mars
         print("----------------------------------------")
         print("Running Mips...")
         print("----------------------------------------")
         subprocess.call(["java", "-jar", "bin/Mars4_5.jar", "tests/output/mips/test.asm"])
 
 
-def main(argv):
+def main():
+    parser = argparse.ArgumentParser(prog='C-Compiler', description='Compiles C-code to MIPS assembly.')
+    parser.add_argument('input_file', help='Input file for your program')
+    parser.add_argument('-r', '--run', action='store_true', help='Run the generated MIPS assembly code using MARS')
+    parser.add_argument('-v', '--visualize', action='store_true', help='Visualize the Abstract Syntax Tree')
+    args = parser.parse_args()
     run(
-        input_file=argv[1],
-        const_folding=True,
-        optimize=True,
-        run_mips=True
+        input_file=args.input_file,
+        visualize=args.visualize,
+        run_mips=args.run
     )
 
 
 if __name__ == '__main__':
-    main(sys.argv)
+    main()
