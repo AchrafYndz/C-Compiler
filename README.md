@@ -1,6 +1,6 @@
 # C-Compiler
 
-<center><img src="icon.png" alt="icon" width="200"/></center>
+<div style="text-align: center;"><img src="icon.png" alt="icon" width="200"/></div>
 <br><br>
 
 [![Python](https://img.shields.io/badge/Python-%3E%3D3.10-blue)](https://www.python.org/downloads/)
@@ -48,6 +48,8 @@ Install the required dependencies:
 ```shell
 pip install -r requirements.txt
 ```
+Compile the ANLTR grammar by running the `scripts/run_antlr.sh` script.
+
 Run the compiler with your C code:
 ```shell
 python3 main.py path/to/your/C/file.c [options]
