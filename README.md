@@ -35,6 +35,11 @@ The available options are:
 - -r or --run: Run the generated MIPS assembly code using MARS.
 - -h or --help: Show the help menu
 
+To run the tests, run the following command:
+```shell
+pytest
+```
+
 ## Prerequisites
 
 Make sure you have the following dependencies installed:
