@@ -41,10 +41,6 @@ def run(input_file, visualize, run_mips):
     translator = TranslationVisitor()
     translator.visitScope(ast.root)
 
-    if visualize:
-        # visualize the ast
-        ast.visualize(filename="test")
-
     # split printf formatting
     print_splitter = PrintSplitVisitor()
     print_splitter.visitScope(ast.root)
@@ -63,7 +59,9 @@ def run(input_file, visualize, run_mips):
     optimizer = OptimizationVisitor()
     optimizer.visitScope(ast.root)
 
-    ast.visualize(filename="test")
+    if visualize:
+        # visualize the ast
+        ast.visualize(filename="test")
 
     # generate mips code
     mips_converter = MIPSConverter(
