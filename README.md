@@ -45,6 +45,7 @@ pytest
 Make sure you have the following dependencies installed:
 
 - Python >= 3.10
+- Java
 - ANTLR4 (included in the repository)
 - MARS MIPS simulator (included in the repository)
 
