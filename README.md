@@ -1,13 +1,17 @@
 # C-Compiler
 
-<div style="text-align: center;"><img src="icon.png" alt="icon" width="200"/></div>
+<p align="center">
+<img src="icon.png" alt="icon" width="200"/>
+</p>
 <br><br>
 
 [![Python](https://img.shields.io/badge/Python-%3E%3D3.10-blue)](https://www.python.org/downloads/)
 [![ANTLR4](https://img.shields.io/badge/antlr4-grammar-yellow)](https://www.antlr.org/)
 [![MIPS Assembly](https://img.shields.io/badge/MIPS-Assembly-red)](https://en.wikipedia.org/wiki/MIPS_architecture)
 
-This is a compiler project for a subset of C, implemented in Python. The compiler takes C code as input and generates MIPS assembly code as output. It also includes a script to automatically build and run the assembly code using MARS MIPS simulator.
+This is a compiler project for a subset of C, implemented in Python. The compiler takes C code as input and generates
+MIPS assembly code as output. It also includes a script to automatically build and run the assembly code using MARS MIPS
+simulator.
 
 ## Features
 
@@ -32,6 +36,7 @@ The available options are:
 - -h or --help: Show the help menu
 
 ## Prerequisites
+
 Make sure you have the following dependencies installed:
 
 - Python >= 3.10
@@ -41,22 +46,30 @@ Make sure you have the following dependencies installed:
 ## Getting Started
 
 Clone this repository:
+
 ```shell
 git clone https://github.com/AchrafYndz/C-Compiler.git
 ```
+
 Install the required dependencies:
+
 ```shell
 pip install -r requirements.txt
 ```
+
 Compile the ANLTR grammar by running the `scripts/run_antlr.sh` script.
 
 Run the compiler with your C code:
+
 ```shell
 python3 main.py path/to/your/C/file.c [options]
 ```
-## Contributing
-This project was developed as a group project by AchrafYndz and 9MaxR9. Contributions are welcome! If you find any issues or want to add new features, please open an issue or submit a pull request.
 
+## Contributing
+
+This project was developed as a group project by AchrafYndz and 9MaxR9. Contributions are welcome! If you find any
+issues or want to add new features, please open an issue or submit a pull request.
 
 ## License
+
 This project is licensed under the MIT License.
