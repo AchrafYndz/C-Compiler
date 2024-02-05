@@ -1,7 +1,7 @@
 # C-Compiler
 
 <p align="center">
-<img src="icon.png" alt="icon" width="200"/>
+<img src="images/logo.png" alt="icon" width="200"/>
 </p>
 <br><br>
 
